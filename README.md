@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CareCompass
+
+AI-powered healthcare navigation for people who need help understanding and accessing the US healthcare system.
+
+## Features
+
+- **AI Chat Assistant** - Plain-language healthcare guidance via OpenRouter (streaming)
+- **Cost Estimator** - Out-of-pocket estimates using real CMS Medicare Fee Schedule rates
+- **Hospital Finder** - Nearby hospitals via Google Places API
+- **Clinic Finder** - HRSA community health centers by ZIP code
+- **Provider Search** - NPI registry doctor/specialist lookup
+- **Insurance Plan Search** - ACA Marketplace plans via Healthcare.gov
+- **Insurance Card Scanner** - Vision API extracts card details from a photo
+- **Glossary** - 40+ insurance/medical terms explained in plain English
+- **Bilingual** - English and Spanish
+- **Accessibility** - High contrast mode, adjustable font sizes, simple language mode
+
+## Tech Stack
+
+- **Frontend**: React 19, TanStack Router, Tailwind CSS v4, shadcn/ui
+- **Backend**: TanStack Start on Cloudflare Workers
+- **Database**: Drizzle ORM + Cloudflare D1 (SQLite)
+- **Auth**: better-auth (email/password)
+- **State**: Zustand (persisted to localStorage)
+- **AI**: OpenRouter API
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env
+# Fill in AUTH_SECRET, OPENROUTER_API_KEY, GOOGLE_PLACES_API_KEY
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dev server runs at `http://care-compass.localhost:1355`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`pnpm dev` automatically generates Drizzle migrations and applies them to the local D1 database before starting.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Generate migrations, apply locally, start dev server |
+| `pnpm build` | Production build |
+| `pnpm deploy` | Build and deploy to Cloudflare Workers |
+| `pnpm db:generate` | Generate Drizzle migrations from schema |
+| `pnpm db:migrate:local` | Apply migrations to local D1 |
+| `pnpm db:migrate:remote` | Apply migrations to remote D1 |
+| `pnpm check` | Format and lint |
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  components/     UI components (shadcn/ui in ui/)
+  lib/
+    auth.ts       better-auth server config
+    auth-client.ts  Client-side auth hooks
+    auth-server.ts  Session server function
+    card-scanner.ts Vision API insurance card parsing
+    cost-estimator.ts CMS Medicare rate lookups
+    db/           Drizzle schema and client
+    geocoding.ts  Reverse geocoding
+    glossary.ts   Insurance term definitions
+    google-places.ts Hospital finder
+    healthcare-gov.ts ACA plan search
+    hrsa.ts       Community health center finder
+    i18n.ts       English/Spanish translations
+    npi.ts        Provider registry search
+    openrouter.ts LLM streaming chat
+    types.ts      Shared type definitions
+  routes/         TanStack Router file-based routes
+  store/          Zustand stores (insurance, reminders, preferences)
+```
