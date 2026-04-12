@@ -1,6 +1,6 @@
 This is a Tanstack Start application
 Zustand for state management
-Full stack cloudflare workers + D1 + Drizzle + better-auth
+Full stack cloudflare workers + D1 + Drizzle + better-auth + Zod
 
 Important Rules:
 Do not use non-ascii characters
