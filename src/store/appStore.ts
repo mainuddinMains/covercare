@@ -25,11 +25,19 @@ const ssrStorage = createJSONStorage(() =>
 
 export interface InsuranceProfile {
   insuranceType: InsuranceType | ''
+  issuerName: string
   planName: string
+  planType: '' | 'HMO' | 'PPO' | 'EPO' | 'HDHP'
   memberId: string
   groupNumber: string
   insurerPhone: string
   effectiveDate: string
+  coverageEndDate: string
+  annualDeductible: string
+  copayPerVisit: string
+  outOfPocketMax: string
+  monthlyPremium: string
+  pcpName: string
   city: string
   state: string
   stateCode: string
@@ -38,11 +46,19 @@ export interface InsuranceProfile {
 
 const EMPTY_PROFILE: InsuranceProfile = {
   insuranceType: '',
+  issuerName: '',
   planName: '',
+  planType: '',
   memberId: '',
   groupNumber: '',
   insurerPhone: '',
   effectiveDate: '',
+  coverageEndDate: '',
+  annualDeductible: '',
+  copayPerVisit: '',
+  outOfPocketMax: '',
+  monthlyPremium: '',
+  pcpName: '',
   city: '',
   state: '',
   stateCode: '',

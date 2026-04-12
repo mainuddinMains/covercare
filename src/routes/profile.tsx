@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { LogOut, UserPlus } from 'lucide-react'
 import InsuranceProfileForm from '@/components/InsuranceProfileForm'
 import AccessibilityPanel from '@/components/AccessibilityPanel'
+import RecommendedPlans from '@/components/RecommendedPlans'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { authClient, signOut, useSession } from '@/lib/auth-client'
@@ -63,6 +64,8 @@ function ProfilePage() {
       )}
 
       <InsuranceProfileForm />
+      <Separator />
+      <RecommendedPlans />
       <Separator />
       <AccessibilityPanel />
       <Separator />

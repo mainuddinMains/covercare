@@ -3,7 +3,6 @@ import {
   MessageCircle,
   Building2,
   Calculator,
-  Bell,
   User,
 } from 'lucide-react'
 import { usePreferencesStore } from '@/store/appStore'
@@ -18,7 +17,6 @@ export default function TabNav() {
     { to: '/chat' as const, label: t.nav_chat, icon: MessageCircle },
     { to: '/hospitals' as const, label: t.nav_hospitals, icon: Building2 },
     { to: '/estimate' as const, label: t.nav_cost, icon: Calculator },
-    { to: '/reminders' as const, label: t.nav_reminders, icon: Bell },
     { to: '/profile' as const, label: t.nav_profile, icon: User },
   ]
 

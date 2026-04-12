@@ -48,8 +48,17 @@ export interface InsurancePlan {
   type: string
   premium: number
   deductible: number
+  oopMax: number
   metalLevel: string
   url?: string
+  rating?: number
+}
+
+export interface PlanRecommendation {
+  plan: InsurancePlan
+  score: number
+  reason: string
+  rank: number
 }
 
 // Geocoding
