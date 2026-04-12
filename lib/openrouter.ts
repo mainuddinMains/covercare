@@ -19,10 +19,15 @@ Guidelines:
 - Keep answers concise and actionable`;
 
 export async function streamChat(
-  messages: Message[]
+  messages: Message[],
+  profileContext?: string
 ): Promise<ReadableStream<Uint8Array>> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
+
+  const systemContent = profileContext
+    ? `${SYSTEM_PROMPT}\n\n---\nUser's saved insurance profile:\n${profileContext}`
+    : SYSTEM_PROMPT;
 
   const res = await fetch(OPENROUTER_API_URL, {
     method: "POST",
@@ -35,7 +40,7 @@ export async function streamChat(
     body: JSON.stringify({
       model: MODEL,
       stream: true,
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+      messages: [{ role: "system", content: systemContent }, ...messages],
     }),
   });
 
