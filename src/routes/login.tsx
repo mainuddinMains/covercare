@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { signIn, signUp } from '@/lib/auth-client'
+import { authClient, signIn, signUp } from '@/lib/auth-client'
 import { usePreferencesStore } from '@/store/appStore'
 import { translations } from '@/lib/i18n'
 
@@ -161,6 +161,29 @@ function LoginPage() {
                 )}
               </Button>
             </form>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-card px-3 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={async () => {
+                setLoading(true)
+                await authClient.signIn.anonymous()
+                navigate({ to: '/' })
+              }}
+              className="h-11 w-full rounded-xl text-sm font-medium"
+            >
+              {t.auth_guest_button}
+            </Button>
           </CardContent>
         </Card>
 

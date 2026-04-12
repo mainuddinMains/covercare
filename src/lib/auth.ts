@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { anonymous } from 'better-auth/plugins'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { createDb } from '@/lib/db/client'
 import * as schema from '@/lib/db/schema'
@@ -16,6 +17,12 @@ export function createAuth(env: CloudflareEnv) {
         verification: schema.verification,
       },
     }),
+
+    plugins: [
+      anonymous({
+        emailDomainName: 'guest.carecompass.app',
+      }),
+    ],
 
     emailAndPassword: {
       enabled: true,
