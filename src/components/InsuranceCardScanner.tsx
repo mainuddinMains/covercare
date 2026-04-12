@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react'
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import type { ScannedCard } from '@/lib/card-scanner'
 import { Camera, Loader2, Upload } from 'lucide-react'
@@ -12,6 +14,8 @@ export default function InsuranceCardScanner({ onScan }: Props) {
   const [error, setError] = useState('')
   const [preview, setPreview] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
 
   async function handleFile(file: File) {
     setError('')
@@ -31,7 +35,7 @@ export default function InsuranceCardScanner({ onScan }: Props) {
       const card: ScannedCard = await res.json()
       onScan(card)
     } catch {
-      setError('Could not read your card. Try a clearer photo.')
+      setError(t.scanner_error)
     } finally {
       setLoading(false)
     }
@@ -56,7 +60,7 @@ export default function InsuranceCardScanner({ onScan }: Props) {
       {preview && (
         <img
           src={preview}
-          alt="Card preview"
+          alt={t.scanner_card_alt}
           className="w-full rounded-lg border border-border"
         />
       )}
@@ -73,7 +77,7 @@ export default function InsuranceCardScanner({ onScan }: Props) {
           ) : (
             <Camera size={16} className="mr-2" />
           )}
-          {loading ? 'Scanning...' : 'Take Photo'}
+          {loading ? t.scanner_scanning : t.scanner_take_photo}
         </Button>
         <Button
           variant="outline"
@@ -88,7 +92,7 @@ export default function InsuranceCardScanner({ onScan }: Props) {
           disabled={loading}
         >
           <Upload size={16} className="mr-2" />
-          Upload
+          {t.scanner_upload}
         </Button>
       </div>
 

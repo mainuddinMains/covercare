@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useRemindersStore, type Reminder } from '@/store/appStore'
+import { useRemindersStore, usePreferencesStore, type Reminder } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 import AddReminderModal from './AddReminderModal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,6 +15,8 @@ import {
 
 export default function RemindersList() {
   const { reminders, deleteReminder, markNotified } = useRemindersStore()
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
   const [showAdd, setShowAdd] = useState(false)
 
   const now = Date.now()
@@ -42,7 +45,7 @@ export default function RemindersList() {
             typeof Notification !== 'undefined' &&
             Notification.permission === 'granted'
           ) {
-            new Notification('CareCompass - Appointment Reminder', {
+            new Notification(t.reminder_notification_title, {
               body: `${r.providerName} at ${formatTime(r.appointmentTime)}${r.notes ? `\n${r.notes}` : ''}`,
               tag: `reminder-${r.id}`,
             })
@@ -54,41 +57,42 @@ export default function RemindersList() {
     check()
     const id = setInterval(check, 30_000)
     return () => clearInterval(id)
-  }, [reminders, markNotified])
+  }, [reminders, markNotified, t])
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-xl font-semibold">Reminders</h1>
+          <h1 className="font-heading text-xl font-semibold">{t.reminder_title}</h1>
           <p className="text-sm text-muted-foreground">
-            Keep track of upcoming appointments.
+            {t.reminder_subtitle}
           </p>
         </div>
         <Button size="sm" onClick={() => setShowAdd(true)}>
           <Plus size={14} className="mr-1" />
-          Add
+          {t.reminder_add}
         </Button>
       </div>
 
       {reminders.length === 0 && (
         <div className="py-12 text-center text-sm text-muted-foreground">
           <Bell size={32} className="mx-auto mb-3 opacity-30" />
-          <p>No reminders yet.</p>
-          <p>Add one to get notified before your appointment.</p>
+          <p>{t.reminder_empty_title}</p>
+          <p>{t.reminder_empty_subtitle}</p>
         </div>
       )}
 
       {upcoming.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xs font-semibold uppercase text-muted-foreground">
-            Upcoming
+            {t.reminder_upcoming}
           </h2>
           {upcoming.map((r) => (
             <ReminderCard
               key={r.id}
               reminder={r}
               onDelete={() => deleteReminder(r.id)}
+              deleteLabel={t.reminder_delete_label}
             />
           ))}
         </div>
@@ -97,7 +101,7 @@ export default function RemindersList() {
       {past.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xs font-semibold uppercase text-muted-foreground">
-            Past
+            {t.reminder_past}
           </h2>
           {past.map((r) => (
             <ReminderCard
@@ -105,6 +109,7 @@ export default function RemindersList() {
               reminder={r}
               onDelete={() => deleteReminder(r.id)}
               past
+              deleteLabel={t.reminder_delete_label}
             />
           ))}
         </div>
@@ -119,10 +124,12 @@ function ReminderCard({
   reminder: r,
   onDelete,
   past,
+  deleteLabel,
 }: {
   reminder: Reminder
   onDelete: () => void
   past?: boolean
+  deleteLabel: string
 }) {
   return (
     <Card className={past ? 'opacity-60' : ''}>
@@ -155,7 +162,7 @@ function ReminderCard({
           variant="ghost"
           size="icon"
           onClick={onDelete}
-          aria-label="Delete reminder"
+          aria-label={deleteLabel}
           className="shrink-0"
         >
           <Trash2 size={14} />

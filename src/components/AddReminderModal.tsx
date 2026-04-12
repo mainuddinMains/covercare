@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useRemindersStore } from '@/store/appStore'
+import { useRemindersStore, usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 interface Props {
   open: boolean
@@ -18,6 +19,8 @@ interface Props {
 
 export default function AddReminderModal({ open, onClose }: Props) {
   const addReminder = useRemindersStore((s) => s.addReminder)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
   const [providerName, setProviderName] = useState('')
   const [providerAddress, setProviderAddress] = useState('')
   const [providerPhone, setProviderPhone] = useState('')
@@ -63,40 +66,40 @@ export default function AddReminderModal({ open, onClose }: Props) {
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Appointment Reminder</DialogTitle>
+          <DialogTitle>{t.reminder_modal_title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="r-provider">Provider Name *</Label>
+            <Label htmlFor="r-provider">{t.reminder_provider_label}</Label>
             <Input
               id="r-provider"
               value={providerName}
               onChange={(e) => setProviderName(e.target.value)}
-              placeholder="e.g. Dr. Smith"
+              placeholder={t.reminder_provider_placeholder}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r-address">Address</Label>
+            <Label htmlFor="r-address">{t.reminder_address_label}</Label>
             <Input
               id="r-address"
               value={providerAddress}
               onChange={(e) => setProviderAddress(e.target.value)}
-              placeholder="Optional"
+              placeholder={t.reminder_optional_placeholder}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r-phone">Phone</Label>
+            <Label htmlFor="r-phone">{t.reminder_phone_label}</Label>
             <Input
               id="r-phone"
               value={providerPhone}
               onChange={(e) => setProviderPhone(e.target.value)}
-              placeholder="Optional"
+              placeholder={t.reminder_optional_placeholder}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="r-date">Date *</Label>
+              <Label htmlFor="r-date">{t.reminder_date_label}</Label>
               <Input
                 id="r-date"
                 type="date"
@@ -106,7 +109,7 @@ export default function AddReminderModal({ open, onClose }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="r-time">Time *</Label>
+              <Label htmlFor="r-time">{t.reminder_time_label}</Label>
               <Input
                 id="r-time"
                 type="time"
@@ -117,7 +120,7 @@ export default function AddReminderModal({ open, onClose }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r-remind">Remind me (minutes before)</Label>
+            <Label htmlFor="r-remind">{t.reminder_remind_label}</Label>
             <select
               id="r-remind"
               value={reminderMinutesBefore}
@@ -126,25 +129,25 @@ export default function AddReminderModal({ open, onClose }: Props) {
               }
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
-              <option value={60}>1 hour</option>
-              <option value={120}>2 hours</option>
-              <option value={1440}>1 day</option>
+              <option value={15}>{t.reminder_15_min}</option>
+              <option value={30}>{t.reminder_30_min}</option>
+              <option value={60}>{t.reminder_1_hour}</option>
+              <option value={120}>{t.reminder_2_hours}</option>
+              <option value={1440}>{t.reminder_1_day}</option>
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r-notes">Notes</Label>
+            <Label htmlFor="r-notes">{t.reminder_notes_label}</Label>
             <Textarea
               id="r-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Bring insurance card, list of medications..."
+              placeholder={t.reminder_notes_placeholder}
               rows={2}
             />
           </div>
           <Button type="submit" className="w-full">
-            Add Reminder
+            {t.reminder_submit}
           </Button>
         </form>
       </DialogContent>

@@ -1,5 +1,6 @@
-import { useInsuranceStore, type InsuranceProfile } from '@/store/appStore'
+import { useInsuranceStore, usePreferencesStore, type InsuranceProfile } from '@/store/appStore'
 import { INSURANCE_LABELS, type InsuranceType } from '@/lib/cost-estimator'
+import { translations } from '@/lib/i18n'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,8 @@ const INSURANCE_OPTIONS = Object.entries(INSURANCE_LABELS) as [
 export default function InsuranceProfileForm() {
   const { profile, updateField, applyScannedCard, clearProfile } =
     useInsuranceStore()
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
 
   const hasProfile = Boolean(profile.insuranceType || profile.planName)
   const locationDisplay = profile.city
@@ -39,15 +42,15 @@ export default function InsuranceProfileForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-xl font-semibold">Insurance Profile</h1>
+        <h1 className="font-heading text-xl font-semibold">{t.profile_title}</h1>
         <p className="text-sm text-muted-foreground">
-          Save your info to get personalized cost estimates and provider matches.
+          {t.profile_subtitle}
         </p>
       </div>
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <h2 className="text-sm font-semibold">Scan Your Card</h2>
+          <h2 className="text-sm font-semibold">{t.profile_scan_heading}</h2>
           <InsuranceCardScanner onScan={handleScan} />
         </CardContent>
       </Card>
@@ -56,7 +59,7 @@ export default function InsuranceProfileForm() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="insuranceType">Insurance Type</Label>
+          <Label htmlFor="insuranceType">{t.profile_insurance_type_label}</Label>
           <select
             id="insuranceType"
             value={profile.insuranceType}
@@ -65,7 +68,7 @@ export default function InsuranceProfileForm() {
             }
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="">Select insurance type...</option>
+            <option value="">{t.profile_insurance_type_placeholder}</option>
             {INSURANCE_OPTIONS.map(([key, label]) => (
               <option key={key} value={key}>
                 {label}
@@ -76,11 +79,11 @@ export default function InsuranceProfileForm() {
 
         {(
           [
-            ['planName', 'Plan Name', 'e.g. Blue Cross PPO'],
-            ['memberId', 'Member ID', 'From your insurance card'],
-            ['groupNumber', 'Group Number', 'From your insurance card'],
-            ['insurerPhone', 'Insurer Phone', 'Customer service number'],
-            ['effectiveDate', 'Effective Date', 'MM/DD/YYYY'],
+            ['planName', t.profile_plan_name_label, t.profile_plan_name_placeholder],
+            ['memberId', t.profile_member_id_label, t.profile_member_id_placeholder],
+            ['groupNumber', t.profile_group_number_label, t.profile_group_number_placeholder],
+            ['insurerPhone', t.profile_insurer_phone_label, t.profile_insurer_phone_placeholder],
+            ['effectiveDate', t.profile_effective_date_label, t.profile_effective_date_placeholder],
           ] as [keyof InsuranceProfile, string, string][]
         ).map(([field, label, placeholder]) => (
           <div key={field} className="space-y-2">
@@ -98,7 +101,7 @@ export default function InsuranceProfileForm() {
       <Separator />
 
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold">Your Location</h2>
+        <h2 className="text-sm font-semibold">{t.profile_location_heading}</h2>
         {locationDisplay ? (
           <p className="text-sm text-muted-foreground">{locationDisplay}</p>
         ) : (
@@ -113,7 +116,7 @@ export default function InsuranceProfileForm() {
           className="w-full"
         >
           <Trash2 size={14} className="mr-2" />
-          Clear Profile
+          {t.profile_clear}
         </Button>
       )}
     </div>

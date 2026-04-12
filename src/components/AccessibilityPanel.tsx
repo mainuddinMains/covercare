@@ -1,15 +1,10 @@
 import { usePreferencesStore, type FontSize } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Eye, Type, Languages, BookOpen } from 'lucide-react'
 import type { Locale } from '@/lib/i18n'
-
-const FONT_OPTIONS: { value: FontSize; label: string }[] = [
-  { value: 'sm', label: 'Small' },
-  { value: 'md', label: 'Medium' },
-  { value: 'lg', label: 'Large' },
-]
 
 const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'en', label: 'English' },
@@ -27,16 +22,23 @@ export default function AccessibilityPanel() {
     simpleMode,
     toggleSimpleMode,
   } = usePreferencesStore()
+  const t = translations[locale]
+
+  const fontOptions: { value: FontSize; label: string }[] = [
+    { value: 'sm', label: t.a11y_font_small },
+    { value: 'md', label: t.a11y_font_medium },
+    { value: 'lg', label: t.a11y_font_large },
+  ]
 
   return (
     <Card>
       <CardContent className="space-y-5 p-4">
-        <h2 className="text-sm font-semibold">Accessibility and Language</h2>
+        <h2 className="text-sm font-semibold">{t.a11y_heading}</h2>
 
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Eye size={14} />
-            High Contrast
+            {t.a11y_high_contrast}
           </Label>
           <Button
             variant={highContrast ? 'default' : 'outline'}
@@ -44,17 +46,17 @@ export default function AccessibilityPanel() {
             onClick={toggleHighContrast}
             className="w-full"
           >
-            {highContrast ? 'On' : 'Off'}
+            {highContrast ? t.a11y_on : t.a11y_off}
           </Button>
         </div>
 
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Type size={14} />
-            Font Size
+            {t.a11y_font_size}
           </Label>
           <div className="flex gap-2">
-            {FONT_OPTIONS.map((opt) => (
+            {fontOptions.map((opt) => (
               <Button
                 key={opt.value}
                 variant={fontSize === opt.value ? 'default' : 'outline'}
@@ -71,7 +73,7 @@ export default function AccessibilityPanel() {
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Languages size={14} />
-            Language
+            {t.a11y_language}
           </Label>
           <div className="flex gap-2">
             {LOCALE_OPTIONS.map((opt) => (
@@ -91,7 +93,7 @@ export default function AccessibilityPanel() {
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <BookOpen size={14} />
-            Simple Language
+            {t.a11y_simple_language}
           </Label>
           <Button
             variant={simpleMode ? 'default' : 'outline'}
@@ -99,10 +101,10 @@ export default function AccessibilityPanel() {
             onClick={toggleSimpleMode}
             className="w-full"
           >
-            {simpleMode ? 'On -- Using simpler words' : 'Off'}
+            {simpleMode ? t.a11y_simple_on : t.a11y_off}
           </Button>
           <p className="text-[11px] text-muted-foreground">
-            When on, the AI assistant uses shorter sentences and avoids jargon.
+            {t.a11y_simple_help}
           </p>
         </div>
       </CardContent>
