@@ -14,8 +14,12 @@ import {
   Building2,
   MapPin,
 } from 'lucide-react'
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 export default function HospitalFinder() {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
   const [hospitals, setHospitals] = useState<CMSHospital[]>([])
   const [widened, setWidened] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -36,7 +40,7 @@ export default function HospitalFinder() {
       setHospitals(data.hospitals)
       setWidened(data.widened)
     } catch {
-      setError('Could not load hospitals. Please try again.')
+      setError(t.hospital_error_fetch)
     } finally {
       setLoading(false)
     }
@@ -49,7 +53,7 @@ export default function HospitalFinder() {
 
   function handleLocate() {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.')
+      setError(t.hospital_error_geolocation)
       return
     }
 
@@ -64,7 +68,7 @@ export default function HospitalFinder() {
             pos.coords.longitude,
           )
           if (!loc.zip) {
-            setError('Could not determine your ZIP code. Please enter it manually.')
+            setError(t.hospital_error_zip)
             setLocating(false)
             return
           }
@@ -72,12 +76,12 @@ export default function HospitalFinder() {
           setLocating(false)
           searchByZip(loc.zip)
         } catch {
-          setError('Could not determine your location. Please enter a ZIP code.')
+          setError(t.hospital_error_location)
           setLocating(false)
         }
       },
       () => {
-        setError('Location permission denied. Please enter a ZIP code.')
+        setError(t.hospital_error_permission)
         setLocating(false)
       },
     )
@@ -87,10 +91,10 @@ export default function HospitalFinder() {
     <div className="space-y-4">
       <div>
         <h1 className="font-heading text-xl font-semibold">
-          Find Hospitals
+          {t.hospital_heading}
         </h1>
         <p className="text-sm text-muted-foreground">
-          CMS Medicare-certified hospitals searchable by ZIP code.
+          {t.hospital_subtitle}
         </p>
       </div>
 
@@ -100,7 +104,7 @@ export default function HospitalFinder() {
           onChange={(e) =>
             setZip(e.target.value.replace(/\D/g, '').slice(0, 5))
           }
-          placeholder="Enter ZIP code"
+          placeholder={t.hospital_zip_placeholder}
           inputMode="numeric"
           maxLength={5}
         />
@@ -124,20 +128,20 @@ export default function HospitalFinder() {
         ) : (
           <MapPin size={16} className="mr-2" />
         )}
-        {locating ? 'Detecting location...' : 'Use My Location'}
+        {locating ? t.hospital_detecting : t.hospital_use_location}
       </Button>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {searched && !loading && hospitals.length === 0 && !error && (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          No hospitals found in this area.
+          {t.hospital_no_results}
         </p>
       )}
 
       {widened && hospitals.length > 0 && !loading && (
         <p className="text-xs text-muted-foreground">
-          Showing hospitals in the wider {zip.slice(0, 3)}xx area.
+          {t.hospital_widened(zip.slice(0, 3))}
         </p>
       )}
 
@@ -169,7 +173,7 @@ export default function HospitalFinder() {
                       size={12}
                       className="fill-amber-400 text-amber-400"
                     />
-                    {h.overallRating}/5 CMS Rating
+                    {h.overallRating}/5 {t.hospital_cms_rating}
                   </span>
                 )}
 
@@ -195,7 +199,7 @@ export default function HospitalFinder() {
 
       {hospitals.length > 0 && (
         <p className="text-center text-[10px] text-muted-foreground">
-          Source: CMS Provider Data Catalog
+          {t.hospital_source}
         </p>
       )}
     </div>

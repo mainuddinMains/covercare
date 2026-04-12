@@ -20,6 +20,14 @@
 			"name": "care-compass-prod",
 			"routes": [
 				{ "pattern": "compass.jacobmaynard.dev", "custom_domain": true }
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "care-compass-db",
+					"database_id": "943637ad-90c8-43a7-987e-c098ced49960",
+					"migrations_dir": "drizzle"
+				}
 			]
 		}
 	}
