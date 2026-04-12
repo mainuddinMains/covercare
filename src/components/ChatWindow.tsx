@@ -16,6 +16,7 @@ import {
   deleteConversation,
 } from '@/lib/server/user-data'
 import { translations } from '@/lib/i18n'
+import { Link } from '@tanstack/react-router'
 import { RotateCcw, Loader2, Compass, History } from 'lucide-react'
 import ToolResult from './chat/ToolResult'
 import ConversationList from './ConversationList'
@@ -203,7 +204,15 @@ export default function ChatWindow() {
   return (
     <div className="flex h-full flex-col">
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="font-heading text-xl font-semibold">{t.nav_chat}</h1>
+        <Link
+          to="/"
+          className="flex items-center gap-2 transition-colors hover:text-primary"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+            <Compass size={14} className="text-primary-foreground" />
+          </div>
+          <span className="font-heading text-lg font-semibold">CareCompass</span>
+        </Link>
         <div className="flex items-center gap-1">
           <LanguageToggle />
           {canShowHistory && (

@@ -1,13 +1,11 @@
 import {
   HeadContent,
-  Link,
   Outlet,
   Scripts,
   createRootRoute,
   redirect,
   useLocation,
 } from '@tanstack/react-router'
-import { Compass } from 'lucide-react'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 import TabNav from '@/components/layout/TabNav'
@@ -99,19 +97,6 @@ function RootLayout() {
       <PreferencesProvider />
       <DataSync />
       <DisclaimerBanner />
-      <header className="shrink-0 border-b border-border bg-card">
-        <div className="mx-auto flex h-11 max-w-2xl items-center px-4">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-foreground transition-colors hover:text-primary"
-          >
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-              <Compass size={13} className="text-primary-foreground" />
-            </div>
-            <span className="font-heading text-sm font-semibold">CareCompass</span>
-          </Link>
-        </div>
-      </header>
       <main className="mx-auto w-full max-w-2xl min-h-0 flex-1 overflow-y-auto px-4 pb-20 pt-4">
         <Outlet />
       </main>
