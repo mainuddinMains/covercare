@@ -48,7 +48,7 @@ function LoginPage() {
       }
     }
 
-    navigate({ to: '/' })
+    navigate({ to: '/chat' })
   }
 
   return (
@@ -178,7 +178,7 @@ function LoginPage() {
               onClick={async () => {
                 setLoading(true)
                 await authClient.signIn.anonymous()
-                navigate({ to: '/' })
+                navigate({ to: '/chat' })
               }}
               className="h-11 w-full rounded-xl text-sm font-medium"
             >

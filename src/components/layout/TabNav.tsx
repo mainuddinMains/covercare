@@ -15,7 +15,7 @@ export default function TabNav() {
   const t = translations[locale]
 
   const TABS = [
-    { to: '/' as const, label: t.nav_chat, icon: MessageCircle },
+    { to: '/chat' as const, label: t.nav_chat, icon: MessageCircle },
     { to: '/hospitals' as const, label: t.nav_hospitals, icon: Building2 },
     { to: '/estimate' as const, label: t.nav_cost, icon: Calculator },
     { to: '/reminders' as const, label: t.nav_reminders, icon: Bell },
@@ -29,9 +29,7 @@ export default function TabNav() {
     >
       <div className="mx-auto flex max-w-2xl">
         {TABS.map((tab) => {
-          const active =
-            matchRoute({ to: tab.to, fuzzy: tab.to !== '/' }) ||
-            (tab.to === '/' && matchRoute({ to: '/' }))
+          const active = !!matchRoute({ to: tab.to, fuzzy: true })
           const Icon = tab.icon
 
           return (

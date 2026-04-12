@@ -68,24 +68,24 @@ function RootError({ error, reset }: ErrorComponentProps) {
   )
 }
 
+const PUBLIC_PATHS = ['/', '/login']
+
 function RootLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { data: session, isPending } = useSession()
-  const isLoginPage = location.pathname === '/login'
+  const isPublicPage = PUBLIC_PATHS.includes(location.pathname)
 
   useEffect(() => {
     if (isPending) return
-    if (!session && !isLoginPage) {
-      navigate({ to: '/login' })
-    }
-    if (session && isLoginPage) {
+    // Unauthenticated users on app pages go to the landing page
+    if (!session && !isPublicPage) {
       navigate({ to: '/' })
     }
-  }, [session, isPending, isLoginPage, navigate])
+  }, [session, isPending, isPublicPage, navigate])
 
-  // Login page gets a clean layout with no chrome
-  if (isLoginPage) {
+  // Public pages (landing, login) get a clean layout
+  if (isPublicPage) {
     return (
       <>
         <PreferencesProvider />
@@ -94,7 +94,7 @@ function RootLayout() {
     )
   }
 
-  // While checking auth, show nothing to avoid flash
+  // While checking auth, show a spinner to avoid flash
   if (isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
