@@ -71,7 +71,7 @@ export default function CostEstimator() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold">Estimate Your Out-of-Pocket Cost</h1>
+        <h1 className="font-heading text-xl font-semibold">Estimate Your Out-of-Pocket Cost</h1>
         <p className="text-sm text-muted-foreground">
           Based on real CMS Medicare Fee Schedule rates.
         </p>

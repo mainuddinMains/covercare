@@ -39,7 +39,7 @@ export default function InsuranceProfileForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Insurance Profile</h1>
+        <h1 className="font-heading text-xl font-semibold">Insurance Profile</h1>
         <p className="text-sm text-muted-foreground">
           Save your info to get personalized cost estimates and provider matches.
         </p>

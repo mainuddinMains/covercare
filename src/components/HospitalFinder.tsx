@@ -56,7 +56,7 @@ export default function HospitalFinder() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold">Find Hospitals Near You</h1>
+        <h1 className="font-heading text-xl font-semibold">Find Hospitals Near You</h1>
         <p className="text-sm text-muted-foreground">
           Real-time data from Google Maps.
         </p>

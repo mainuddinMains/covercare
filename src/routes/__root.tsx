@@ -52,7 +52,7 @@ function RootError({ error, reset }: ErrorComponentProps) {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-32 text-center">
-      <h1 className="text-4xl font-bold">Something went wrong</h1>
+      <h1 className="font-heading text-4xl font-bold">Something went wrong</h1>
       <p className="max-w-md text-muted-foreground">{message}</p>
       <button
         onClick={reset}

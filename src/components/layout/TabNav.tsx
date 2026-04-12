@@ -24,7 +24,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]"
       aria-label="Main navigation"
     >
       <div className="mx-auto flex max-w-2xl">

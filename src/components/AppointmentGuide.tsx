@@ -105,7 +105,7 @@ export default function AppointmentGuide() {
       <div>
         <div className="mb-1 flex items-center gap-2">
           <Calendar size={22} className="text-primary" />
-          <h1 className="text-lg font-semibold">Your First Doctor Visit</h1>
+          <h1 className="font-heading text-xl font-semibold">Your First Doctor Visit</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           Not sure what to expect? Here is exactly what happens, step by step.

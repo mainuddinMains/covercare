@@ -119,7 +119,7 @@ export default function ChatWindow() {
   return (
     <div className="flex h-[calc(100svh-8rem)] flex-col">
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">{t.nav_chat}</h1>
+        <h1 className="font-heading text-xl font-semibold">{t.nav_chat}</h1>
         {messages.length > 1 && (
           <Button variant="ghost" size="sm" onClick={reset}>
             <RotateCcw size={14} className="mr-1.5" />
