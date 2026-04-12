@@ -1,28 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { findHospitals } from '@/lib/google-places'
-import { getCfEnv } from '@/lib/env'
+import { searchHospitalsByZip } from '@/lib/cms-hospitals'
 
 export const Route = createFileRoute('/api/hospitals/')({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url)
-        const lat = parseFloat(url.searchParams.get('lat') ?? '')
-        const lng = parseFloat(url.searchParams.get('lng') ?? '')
+        const zip = url.searchParams.get('zip')
 
-        if (isNaN(lat) || isNaN(lng)) {
+        if (!zip || zip.length !== 5) {
           return new Response(
-            JSON.stringify({ error: 'lat and lng are required' }),
+            JSON.stringify({ error: 'A 5-digit ZIP code is required' }),
             { status: 400, headers: { 'Content-Type': 'application/json' } },
           )
         }
 
-        const env = getCfEnv()
-        const hospitals = await findHospitals(
-          env.GOOGLE_PLACES_API_KEY,
-          lat,
-          lng,
-        )
+        const hospitals = await searchHospitalsByZip(zip)
         return new Response(JSON.stringify(hospitals), {
           headers: { 'Content-Type': 'application/json' },
         })

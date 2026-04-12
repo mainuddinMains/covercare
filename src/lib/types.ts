@@ -52,21 +52,6 @@ export interface InsurancePlan {
   url?: string
 }
 
-// Google Places
-export interface Hospital {
-  id: string
-  name: string
-  address: string
-  phone?: string
-  website?: string
-  rating?: number
-  totalRatings?: number
-  openNow?: boolean
-  lat: number
-  lng: number
-  distanceMiles?: number
-}
-
 // Geocoding
 export interface DetectedLocation {
   city: string
