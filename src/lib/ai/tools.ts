@@ -67,6 +67,24 @@ const searchProvidersDef = toolDefinition({
   }),
 })
 
+const compareHospitalPricesDef = toolDefinition({
+  name: 'compare_hospital_prices' as const,
+  description:
+    'Compare what different hospitals charge for an inpatient procedure using real CMS Medicare claims data. Search by DRG code (a number like 470 for knee replacement) or a keyword (like "hip", "heart", "sepsis"). Optionally filter by state. Returns hospital name, city, state, procedure description, average total payment, average Medicare payment, and number of discharges. Use this when the user wants to compare hospital costs or asks "how much does X cost at hospitals in Y".',
+  inputSchema: z.object({
+    keyword: z
+      .string()
+      .describe(
+        'DRG code (e.g. "470") or keyword to search procedure descriptions (e.g. "knee", "hip replacement", "heart failure")',
+      ),
+    state: z
+      .string()
+      .length(2)
+      .optional()
+      .describe('2-letter state abbreviation to filter by (e.g. "CA", "TX")'),
+  }),
+})
+
 const detectLocationDef = toolDefinition({
   name: 'detect_location' as const,
   description:
@@ -101,6 +119,16 @@ const searchProvidersClient = searchProvidersDef.client(async (args) => {
 const getInsuranceProfileClient = getInsuranceProfileDef.client(() => {
   return useInsuranceStore.getState().profile
 })
+
+const compareHospitalPricesClient = compareHospitalPricesDef.client(
+  async (args) => {
+    const params = new URLSearchParams({ keyword: args.keyword })
+    if (args.state) params.set('state', args.state)
+    const res = await fetch(`/api/hospital-prices?${params}`)
+    if (!res.ok) return { error: 'Failed to look up hospital prices' }
+    return res.json()
+  },
+)
 
 const detectLocationClient = detectLocationDef.client(async () => {
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -141,6 +169,7 @@ export const TOOL_DEFS = [
   searchHospitalsDef,
   searchProvidersDef,
   estimateCostDef,
+  compareHospitalPricesDef,
   getInsuranceProfileDef,
   detectLocationDef,
 ]
@@ -150,6 +179,7 @@ export const CLIENT_TOOLS = [
   searchHospitalsClient,
   searchProvidersClient,
   estimateCostClient,
+  compareHospitalPricesClient,
   getInsuranceProfileClient,
   detectLocationClient,
 ] as const
@@ -159,6 +189,7 @@ export const TOOL_LABELS: Record<string, string> = {
   search_hospitals: 'Searching hospitals',
   search_providers: 'Searching providers',
   estimate_cost: 'Estimating cost',
+  compare_hospital_prices: 'Comparing hospital prices',
   get_insurance_profile: 'Reading your profile',
   detect_location: 'Detecting your location',
 }

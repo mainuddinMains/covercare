@@ -14,6 +14,7 @@ import {
 import type { CMSHospital, HospitalSearchResult } from '@/lib/cms-hospitals'
 import type { CMSPhysician, PhysicianSearchResult } from '@/lib/cms-physicians'
 import type { CostEstimate } from '@/lib/cost-estimator'
+import type { HospitalPrice } from '@/lib/types'
 
 interface Props {
   name: string
@@ -30,6 +31,12 @@ export default function ToolResult({ name, output }: Props) {
       return <ProviderResults data={output as PhysicianSearchResult} />
     case 'estimate_cost':
       return <CostResult data={output as CostEstimate} />
+    case 'compare_hospital_prices':
+      return (
+        <HospitalPriceResults
+          data={output as { prices: HospitalPrice[] } | { error: string }}
+        />
+      )
     case 'detect_location':
       return <LocationPill data={output as LocationOutput} />
     default:
@@ -270,6 +277,86 @@ function CostResult({ data }: { data: CostEstimate }) {
       )}
 
       <p className="text-[10px] text-muted-foreground">{data.note}</p>
+    </div>
+  )
+}
+
+// ── Hospital Price Results ──
+
+function HospitalPriceResults({
+  data,
+}: {
+  data: { prices: HospitalPrice[] } | { error: string }
+}) {
+  const [expanded, setExpanded] = useState(false)
+  if ('error' in data) return null
+  const { prices } = data
+  if (!prices?.length) return null
+
+  const visible = expanded ? prices : prices.slice(0, 3)
+  const hasMore = prices.length > 3
+
+  return (
+    <div className="space-y-2">
+      <div className="grid gap-2">
+        {visible.map((p, i) => (
+          <div key={i} className="rounded-xl border border-border bg-card p-3">
+            <div className="mb-1.5">
+              <p className="text-[13px] font-semibold leading-tight">
+                {p.hospitalName}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {p.city}, {p.state}
+                {p.procedureDescription && (
+                  <span className="ml-1">
+                    | {p.procedureDescription}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-[11px]">
+              <span className="flex items-center gap-0.5">
+                <DollarSign size={10} className="text-primary" />
+                <span className="text-muted-foreground">Avg total:</span>{' '}
+                <span className="font-semibold">
+                  ${p.averageTotalPayments.toLocaleString()}
+                </span>
+              </span>
+              <span className="flex items-center gap-0.5">
+                <DollarSign size={10} className="text-muted-foreground" />
+                <span className="text-muted-foreground">Medicare pays:</span>{' '}
+                <span className="font-semibold">
+                  ${p.averageMedicarePayments.toLocaleString()}
+                </span>
+              </span>
+              {p.discharges > 0 && (
+                <span className="text-muted-foreground">
+                  {p.discharges.toLocaleString()} cases
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex w-full items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        >
+          {expanded ? (
+            <>
+              Show less
+              <ChevronUp size={12} />
+            </>
+          ) : (
+            <>
+              Show {prices.length - 3} more
+              <ChevronDown size={12} />
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }
