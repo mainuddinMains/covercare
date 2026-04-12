@@ -8,8 +8,11 @@ import {
   MapPin,
   ChevronDown,
   ChevronUp,
+  Stethoscope,
+  Video,
 } from 'lucide-react'
 import type { CMSHospital, HospitalSearchResult } from '@/lib/cms-hospitals'
+import type { CMSPhysician, PhysicianSearchResult } from '@/lib/cms-physicians'
 import type { CostEstimate } from '@/lib/cost-estimator'
 
 interface Props {
@@ -23,6 +26,8 @@ export default function ToolResult({ name, output }: Props) {
   switch (name) {
     case 'search_hospitals':
       return <HospitalResults data={output as HospitalSearchResult} />
+    case 'search_providers':
+      return <ProviderResults data={output as PhysicianSearchResult} />
     case 'estimate_cost':
       return <CostResult data={output as CostEstimate} />
     case 'detect_location':
@@ -113,6 +118,104 @@ function HospitalCard({ hospital: h }: { hospital: CMSHospital }) {
           >
             <Phone size={10} />
             {h.phone}
+          </a>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Provider Results ──
+
+function ProviderResults({ data }: { data: PhysicianSearchResult }) {
+  const [expanded, setExpanded] = useState(false)
+  if ('error' in data) return null
+  const { physicians, widened } = data
+  if (!physicians?.length) return null
+
+  const visible = expanded ? physicians : physicians.slice(0, 3)
+  const hasMore = physicians.length > 3
+
+  return (
+    <div className="space-y-2">
+      {widened && (
+        <p className="text-[11px] text-muted-foreground">
+          Showing providers in the wider area
+        </p>
+      )}
+      <div className="grid gap-2">
+        {visible.map((p) => (
+          <ProviderCard key={p.npi} provider={p} />
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex w-full items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        >
+          {expanded ? (
+            <>
+              Show less
+              <ChevronUp size={12} />
+            </>
+          ) : (
+            <>
+              Show {physicians.length - 3} more
+              <ChevronDown size={12} />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function ProviderCard({ provider: p }: { provider: CMSPhysician }) {
+  const name = `${p.firstName} ${p.lastName}`
+  const location = [p.address, p.city, `${p.state} ${p.zip}`]
+    .filter(Boolean)
+    .join(', ')
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-3">
+      <div className="mb-1.5 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold leading-tight">
+            {name}
+            {p.credential && (
+              <span className="ml-1 font-normal text-muted-foreground">
+                {p.credential}
+              </span>
+            )}
+          </p>
+          <p className="text-[11px] text-muted-foreground">{location}</p>
+        </div>
+        {p.telehealth && (
+          <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+            <Video size={9} />
+            Telehealth
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-0.5">
+          <Stethoscope size={10} />
+          {p.specialty}
+        </span>
+        {p.facilityName && (
+          <span className="flex items-center gap-0.5">
+            <Building2 size={10} />
+            {p.facilityName}
+          </span>
+        )}
+        {p.phone && (
+          <a
+            href={`tel:${p.phone}`}
+            className="flex items-center gap-0.5 text-primary hover:underline"
+          >
+            <Phone size={10} />
+            {p.phone}
           </a>
         )}
       </div>

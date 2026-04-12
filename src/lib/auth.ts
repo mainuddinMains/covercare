@@ -37,7 +37,19 @@ export function createAuth(env: CloudflareEnv) {
       },
     },
 
-    baseURL: env.AUTH_BASE_URL || 'http://localhost:3000',
+    baseURL: env.AUTH_BASE_URL,
+    trustedOrigins: (request) => {
+      if (env.DEV_MODE === 'true') {
+        const origin = request?.headers.get('origin')
+        if (origin) {
+          const url = new URL(origin)
+          if (url.hostname === 'localhost' || url.hostname.endsWith('.localhost')) {
+            return [origin]
+          }
+        }
+      }
+      return env.AUTH_TRUSTED_ORIGINS ? env.AUTH_TRUSTED_ORIGINS.split(',') : []
+    },
     secret: env.AUTH_SECRET,
   })
 }

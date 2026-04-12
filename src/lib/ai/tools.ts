@@ -49,6 +49,24 @@ const getInsuranceProfileDef = toolDefinition({
   inputSchema: z.object({}),
 })
 
+const searchProvidersDef = toolDefinition({
+  name: 'search_providers' as const,
+  description:
+    'Search for doctors and healthcare providers near a ZIP code, optionally filtered by specialty. Returns provider names, credentials, specialty, facility, address, phone, and whether they offer telehealth. Uses CMS Medicare provider data. Specialty search is case-insensitive and matches partial names (e.g. "cardio" matches "Cardiovascular Disease (Cardiology)").',
+  inputSchema: z.object({
+    zip: z
+      .string()
+      .length(5)
+      .describe('5-digit US ZIP code to search near'),
+    specialty: z
+      .string()
+      .optional()
+      .describe(
+        'Specialty keyword to filter by (e.g. "cardiology", "psychiatry", "orthopedic", "dermatology", "internal medicine"). Omit to search all specialties.',
+      ),
+  }),
+})
+
 const detectLocationDef = toolDefinition({
   name: 'detect_location' as const,
   description:
@@ -69,6 +87,14 @@ const estimateCostClient = estimateCostDef.client(async (args) => {
     `/api/cost-estimate?procedure=${args.procedure}&insurance=${args.insurance}`,
   )
   if (!res.ok) return { error: 'Failed to estimate cost' }
+  return res.json()
+})
+
+const searchProvidersClient = searchProvidersDef.client(async (args) => {
+  const params = new URLSearchParams({ zip: args.zip })
+  if (args.specialty) params.set('specialty', args.specialty)
+  const res = await fetch(`/api/providers?${params}`)
+  if (!res.ok) return { error: 'Failed to search providers' }
   return res.json()
 })
 
@@ -113,6 +139,7 @@ const detectLocationClient = detectLocationDef.client(async () => {
 /** Tool definitions (no execute) -- passed to server-side chat() */
 export const TOOL_DEFS = [
   searchHospitalsDef,
+  searchProvidersDef,
   estimateCostDef,
   getInsuranceProfileDef,
   detectLocationDef,
@@ -121,6 +148,7 @@ export const TOOL_DEFS = [
 /** Client tools (with execute) -- passed to useChat() */
 export const CLIENT_TOOLS = [
   searchHospitalsClient,
+  searchProvidersClient,
   estimateCostClient,
   getInsuranceProfileClient,
   detectLocationClient,
@@ -129,6 +157,7 @@ export const CLIENT_TOOLS = [
 /** Labels shown while tools are executing */
 export const TOOL_LABELS: Record<string, string> = {
   search_hospitals: 'Searching hospitals',
+  search_providers: 'Searching providers',
   estimate_cost: 'Estimating cost',
   get_insurance_profile: 'Reading your profile',
   detect_location: 'Detecting your location',
