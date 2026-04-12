@@ -15,6 +15,8 @@ import {
   ArrowRight,
   Calendar,
 } from 'lucide-react'
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 interface GuideStep {
   number: number
@@ -25,76 +27,59 @@ interface GuideStep {
   items?: string[]
 }
 
-const STEPS: GuideStep[] = [
-  {
-    number: 1,
-    icon: ClipboardList,
-    title: 'Get Ready at Home',
-    body: 'Before your appointment, gather a few things so check-in goes smoothly.',
-    items: [
-      'Your insurance card (front and back)',
-      'A photo ID -- driver\'s license or passport',
-      'A list of any medicines you take, including vitamins',
-      'Any past medical records if you have them',
-      'A list of questions you want to ask',
-    ],
-    tip: 'No insurance? Tell them when you call. Many clinics offer a sliding-scale fee based on what you can afford.',
-  },
-  {
-    number: 2,
-    icon: Building,
-    title: 'Arrive and Check In',
-    body: 'Get there 10 to 15 minutes early. The front desk will ask for your name, ID, and insurance card.',
-    items: [
-      'You may fill out a short health history form -- it is okay to leave things blank if you do not know',
-      'You might wait 10 to 30 minutes -- this is normal',
-      'Bring something to read or listen to',
-    ],
-    tip: 'You can ask the front desk what your visit will cost before you see the doctor.',
-  },
-  {
-    number: 3,
-    icon: Stethoscope,
-    title: 'Meet the Nurse',
-    body: 'A nurse or medical assistant will bring you to a room first. They will check a few basic things.',
-    items: [
-      'Your weight and height',
-      'Your blood pressure and temperature',
-      'They will ask why you came in today -- be honest, even if it feels embarrassing',
-      'They will check your medicines list',
-    ],
-    tip: 'Write down your main concern before the visit so you do not forget to mention it.',
-  },
-  {
-    number: 4,
-    icon: HeartPulse,
-    title: 'See Your Doctor',
-    body: 'The doctor will listen to you, ask questions, and examine you. This is YOUR time -- speak up.',
-    items: [
-      'Describe your symptoms in plain language -- no need for medical words',
-      'Ask them to explain anything you do not understand',
-      '"What is this medication for?" or "When should I come back?"',
-      'It is okay to say "Can you write that down for me?"',
-    ],
-    tip: 'You can bring a friend or family member to listen and help you remember what the doctor says.',
-  },
-  {
-    number: 5,
-    icon: Home,
-    title: 'Before You Leave',
-    body: 'After seeing the doctor, a few things might happen. Make sure you understand the next steps.',
-    items: [
-      'You might get a prescription -- ask the pharmacy about generic options (they cost less)',
-      'You might get a referral to see a specialist',
-      'Ask when your test results will be ready and how you will hear about them',
-      'Pay any bills at the front desk, or ask about a payment plan',
-    ],
-    tip: 'If you get a bill later in the mail, it is okay to call the billing office and ask for a lower price or payment plan.',
-  },
-]
+function useSteps(): GuideStep[] {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
+  return [
+    {
+      number: 1,
+      icon: ClipboardList,
+      title: t.guide_step1_title,
+      body: t.guide_step1_body,
+      items: [...t.guide_step1_items],
+      tip: t.guide_step1_tip,
+    },
+    {
+      number: 2,
+      icon: Building,
+      title: t.guide_step2_title,
+      body: t.guide_step2_body,
+      items: [...t.guide_step2_items],
+      tip: t.guide_step2_tip,
+    },
+    {
+      number: 3,
+      icon: Stethoscope,
+      title: t.guide_step3_title,
+      body: t.guide_step3_body,
+      items: [...t.guide_step3_items],
+      tip: t.guide_step3_tip,
+    },
+    {
+      number: 4,
+      icon: HeartPulse,
+      title: t.guide_step4_title,
+      body: t.guide_step4_body,
+      items: [...t.guide_step4_items],
+      tip: t.guide_step4_tip,
+    },
+    {
+      number: 5,
+      icon: Home,
+      title: t.guide_step5_title,
+      body: t.guide_step5_body,
+      items: [...t.guide_step5_items],
+      tip: t.guide_step5_tip,
+    },
+  ]
+}
 
 export default function AppointmentGuide() {
   const [expanded, setExpanded] = useState<number | null>(0)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+  const steps = useSteps()
 
   function toggle(i: number) {
     setExpanded((prev) => (prev === i ? null : i))
@@ -105,11 +90,10 @@ export default function AppointmentGuide() {
       <div>
         <div className="mb-1 flex items-center gap-2">
           <Calendar size={22} className="text-primary" />
-          <h1 className="font-heading text-xl font-semibold">Your First Doctor Visit</h1>
+          <h1 className="font-heading text-xl font-semibold">{t.guide_title}</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Not sure what to expect? Here is exactly what happens, step by step.
-          Tap any step to see the details.
+          {t.guide_description}
         </p>
       </div>
 
@@ -120,7 +104,7 @@ export default function AppointmentGuide() {
         />
 
         <ol className="space-y-3" aria-label="Appointment steps">
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const isOpen = expanded === i
             const isDone = expanded !== null && i < expanded
             const Icon = step.icon
@@ -153,7 +137,7 @@ export default function AppointmentGuide() {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-                        Step {step.number} of {STEPS.length}
+                        {t.guide_step_counter(step.number, steps.length)}
                       </span>
                       <h2 className="mt-0.5 text-sm font-semibold">
                         {step.title}
@@ -220,20 +204,20 @@ export default function AppointmentGuide() {
                         className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-0"
                       >
                         <ArrowLeft size={12} />
-                        Previous
+                        {t.guide_previous}
                       </button>
-                      {i < STEPS.length - 1 ? (
+                      {i < steps.length - 1 ? (
                         <button
                           onClick={() => setExpanded(i + 1)}
-                          aria-label={`Next step: ${STEPS[i + 1].title}`}
+                          aria-label={`Next step: ${steps[i + 1].title}`}
                           className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80"
                         >
-                          Next: {STEPS[i + 1].title}
+                          {t.guide_next(steps[i + 1].title)}
                           <ArrowRight size={12} />
                         </button>
                       ) : (
                         <span className="text-xs font-medium text-green-600">
-                          You are all set!
+                          {t.guide_complete}
                         </span>
                       )}
                     </div>
@@ -247,16 +231,16 @@ export default function AppointmentGuide() {
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-4">
-          <p className="mb-1 text-sm font-medium">Ready to find a clinic?</p>
+          <p className="mb-1 text-sm font-medium">{t.guide_cta_title}</p>
           <p className="mb-3 text-xs text-muted-foreground">
-            Find a free or low-cost clinic near you using CareCompass.
+            {t.guide_cta_body}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" asChild>
-              <Link to="/">Ask the assistant</Link>
+              <Link to="/">{t.guide_cta_assistant}</Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <Link to="/hospitals">Find nearby hospitals</Link>
+              <Link to="/hospitals">{t.guide_cta_hospitals}</Link>
             </Button>
           </div>
         </CardContent>

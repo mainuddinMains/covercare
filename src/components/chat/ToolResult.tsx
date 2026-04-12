@@ -25,6 +25,8 @@ import type { CostEstimate } from '@/lib/cost-estimator'
 import type { HospitalPrice, Clinic } from '@/lib/types'
 import type { EligibilityResult } from '@/lib/assistance-eligibility'
 import type { DrugInfo, DrugAlternative } from '@/lib/fda-drugs'
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 interface Props {
   name: string
@@ -77,10 +79,13 @@ export default function ToolResult({ name, output }: Props) {
   }
 }
 
-// ── Hospital Results ──
+// Hospital Results
 
 function HospitalResults({ data }: { data: HospitalSearchResult }) {
   const [expanded, setExpanded] = useState(false)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   if ('error' in data) return null
   const { hospitals, widened } = data
   if (!hospitals?.length) return null
@@ -92,7 +97,7 @@ function HospitalResults({ data }: { data: HospitalSearchResult }) {
     <div className="space-y-2">
       {widened && (
         <p className="text-[11px] text-muted-foreground">
-          Showing hospitals in the wider area
+          {t.tool_wider_area_hospitals}
         </p>
       )}
       <div className="grid gap-2">
@@ -108,12 +113,12 @@ function HospitalResults({ data }: { data: HospitalSearchResult }) {
         >
           {expanded ? (
             <>
-              Show less
+              {t.tool_show_less}
               <ChevronUp size={12} />
             </>
           ) : (
             <>
-              Show {hospitals.length - 3} more
+              {t.tool_show_more(hospitals.length - 3)}
               <ChevronDown size={12} />
             </>
           )}
@@ -124,6 +129,9 @@ function HospitalResults({ data }: { data: HospitalSearchResult }) {
 }
 
 function HospitalCard({ hospital: h }: { hospital: CMSHospital }) {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   return (
     <div className="rounded-xl border border-border bg-card p-3">
       <div className="mb-1.5 flex items-start justify-between gap-2">
@@ -136,7 +144,7 @@ function HospitalCard({ hospital: h }: { hospital: CMSHospital }) {
         {h.emergencyServices && (
           <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-medium text-destructive-foreground">
             <Siren size={9} />
-            ER
+            {t.tool_er}
           </span>
         )}
       </div>
@@ -165,10 +173,13 @@ function HospitalCard({ hospital: h }: { hospital: CMSHospital }) {
   )
 }
 
-// ── Provider Results ──
+// Provider Results
 
 function ProviderResults({ data }: { data: PhysicianSearchResult }) {
   const [expanded, setExpanded] = useState(false)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   if ('error' in data) return null
   const { physicians, widened } = data
   if (!physicians?.length) return null
@@ -180,7 +191,7 @@ function ProviderResults({ data }: { data: PhysicianSearchResult }) {
     <div className="space-y-2">
       {widened && (
         <p className="text-[11px] text-muted-foreground">
-          Showing providers in the wider area
+          {t.tool_wider_area_providers}
         </p>
       )}
       <div className="grid gap-2">
@@ -196,12 +207,12 @@ function ProviderResults({ data }: { data: PhysicianSearchResult }) {
         >
           {expanded ? (
             <>
-              Show less
+              {t.tool_show_less}
               <ChevronUp size={12} />
             </>
           ) : (
             <>
-              Show {physicians.length - 3} more
+              {t.tool_show_more(physicians.length - 3)}
               <ChevronDown size={12} />
             </>
           )}
@@ -212,6 +223,9 @@ function ProviderResults({ data }: { data: PhysicianSearchResult }) {
 }
 
 function ProviderCard({ provider: p }: { provider: CMSPhysician }) {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   const name = `${p.firstName} ${p.lastName}`
   const location = [p.address, p.city, `${p.state} ${p.zip}`]
     .filter(Boolean)
@@ -234,7 +248,7 @@ function ProviderCard({ provider: p }: { provider: CMSPhysician }) {
         {p.telehealth && (
           <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
             <Video size={9} />
-            Telehealth
+            {t.tool_telehealth}
           </span>
         )}
       </div>
@@ -263,9 +277,12 @@ function ProviderCard({ provider: p }: { provider: CMSPhysician }) {
   )
 }
 
-// ── Cost Result ──
+// Cost Result
 
 function CostResult({ data }: { data: CostEstimate }) {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   if ('error' in data) return null
 
   return (
@@ -286,7 +303,7 @@ function CostResult({ data }: { data: CostEstimate }) {
         <div className="mb-2 grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-muted/60 p-2">
             <p className="text-[9px] font-medium uppercase text-muted-foreground">
-              Your estimated cost
+              {t.tool_estimated_cost}
             </p>
             <p className="text-sm font-bold text-primary">
               ${data.outOfPocketLow} - ${data.outOfPocketHigh}
@@ -294,7 +311,7 @@ function CostResult({ data }: { data: CostEstimate }) {
           </div>
           <div className="rounded-lg bg-muted/60 p-2">
             <p className="text-[9px] font-medium uppercase text-muted-foreground">
-              Total billed
+              {t.tool_total_billed}
             </p>
             <p className="text-sm font-bold">
               ${data.totalEstimatedCost?.toLocaleString()}
@@ -304,7 +321,7 @@ function CostResult({ data }: { data: CostEstimate }) {
       ) : (
         <div className="mb-2 rounded-lg bg-muted/60 p-2 text-center">
           <p className="text-xs text-muted-foreground">
-            Cost data not available for this procedure
+            {t.tool_cost_unavailable}
           </p>
         </div>
       )}
@@ -314,7 +331,7 @@ function CostResult({ data }: { data: CostEstimate }) {
   )
 }
 
-// ── Hospital Price Results ──
+// Hospital Price Results
 
 function HospitalPriceResults({
   data,
@@ -322,6 +339,9 @@ function HospitalPriceResults({
   data: { prices: HospitalPrice[] } | { error: string }
 }) {
   const [expanded, setExpanded] = useState(false)
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   if ('error' in data) return null
   const { prices } = data
   if (!prices?.length) return null
@@ -350,21 +370,21 @@ function HospitalPriceResults({
             <div className="flex flex-wrap items-center gap-3 text-[11px]">
               <span className="flex items-center gap-0.5">
                 <DollarSign size={10} className="text-primary" />
-                <span className="text-muted-foreground">Avg total:</span>{' '}
+                <span className="text-muted-foreground">{t.tool_avg_total}</span>{' '}
                 <span className="font-semibold">
                   ${p.averageTotalPayments.toLocaleString()}
                 </span>
               </span>
               <span className="flex items-center gap-0.5">
                 <DollarSign size={10} className="text-muted-foreground" />
-                <span className="text-muted-foreground">Medicare pays:</span>{' '}
+                <span className="text-muted-foreground">{t.tool_medicare_pays}</span>{' '}
                 <span className="font-semibold">
                   ${p.averageMedicarePayments.toLocaleString()}
                 </span>
               </span>
               {p.discharges > 0 && (
                 <span className="text-muted-foreground">
-                  {p.discharges.toLocaleString()} cases
+                  {t.tool_cases(p.discharges.toLocaleString())}
                 </span>
               )}
             </div>
@@ -379,12 +399,12 @@ function HospitalPriceResults({
         >
           {expanded ? (
             <>
-              Show less
+              {t.tool_show_less}
               <ChevronUp size={12} />
             </>
           ) : (
             <>
-              Show {prices.length - 3} more
+              {t.tool_show_more(prices.length - 3)}
               <ChevronDown size={12} />
             </>
           )}
