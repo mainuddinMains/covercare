@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Phone,
 } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 import { usePreferencesStore } from '@/store/appStore'
@@ -39,12 +40,26 @@ const FEATURES = [
 ]
 
 function LandingPage() {
-  const navigate = useNavigate()
   const locale = usePreferencesStore((s) => s.locale)
   const t = translations[locale]
+  const navigate = useNavigate()
+  const [guestLoading, setGuestLoading] = useState(false)
+  const [guestError, setGuestError] = useState<string | null>(null)
+
+  async function handleGuest() {
+    setGuestLoading(true)
+    setGuestError(null)
+    const { error } = await authClient.signIn.anonymous()
+    if (error) {
+      setGuestError('Could not continue as guest. Please try again.')
+      setGuestLoading(false)
+      return
+    }
+    navigate({ to: '/chat' })
+  }
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Hero */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-16 text-center">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-lg shadow-primary/20">
@@ -125,13 +140,14 @@ function LandingPage() {
           <Button
             variant="ghost"
             className="text-sm text-muted-foreground"
-            onClick={async () => {
-              await authClient.signIn.anonymous()
-              navigate({ to: '/chat' })
-            }}
+            onClick={handleGuest}
+            disabled={guestLoading}
           >
-            {t.auth_guest_button}
+            {guestLoading ? 'Loading...' : t.auth_guest_button}
           </Button>
+          {guestError && (
+            <p className="text-xs text-destructive">{guestError}</p>
+          )}
         </div>
         <p className="mt-4 text-xs text-muted-foreground">{t.auth_footer}</p>
       </div>

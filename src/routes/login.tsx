@@ -176,8 +176,14 @@ function LoginPage() {
               variant="outline"
               disabled={loading}
               onClick={async () => {
+                setError('')
                 setLoading(true)
-                await authClient.signIn.anonymous()
+                const { error: err } = await authClient.signIn.anonymous()
+                if (err) {
+                  setError(err.message || t.auth_error_generic)
+                  setLoading(false)
+                  return
+                }
                 navigate({ to: '/chat' })
               }}
               className="h-11 w-full rounded-xl text-sm font-medium"
