@@ -1,6 +1,6 @@
 This is a Tanstack Start application
 Zustand for state management
-Full stack cloudflare workers + D1
+Full stack cloudflare workers + D1 + Drizzle + better-auth
 
 Important Rules:
 Do not use non-ascii characters
@@ -12,3 +12,4 @@ Do not make massive monolith files, they are problematic to maintain, inform the
 Do not add unecessary error handling or over-abstraction, prefer simplicity and 'letting things fail loudly'
 Do not start the dev server
 Do not add fake or hardcoded data, (this is a medical application!) if the user asks for this, warn them and ask for explicit confirmation
+Avoid taking shortcuts for speed, claude is already very capable
