@@ -75,3 +75,60 @@ export interface DetectedLocation {
   zip: string
   display: string
 }
+
+// SAMHSA Treatment Facilities
+export interface TreatmentFacility {
+  id: string
+  name: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  phone?: string
+  website?: string
+  lat: number
+  lng: number
+  services: string[]
+  acceptsMedicaid: boolean
+  acceptsMedicare: boolean
+  acceptsSlidingFee: boolean
+}
+
+// CMS Hospital Pricing
+export interface HospitalPrice {
+  hospitalName: string
+  city: string
+  state: string
+  procedureCode: string
+  procedureDescription: string
+  averageTotalPayments: number
+  averageMedicarePayments: number
+  discharges: number
+}
+
+// GoodRx Drug Pricing
+export interface DrugPrice {
+  drugName: string
+  genericName?: string
+  dosage: string
+  quantity: number
+  form: string
+  pharmacy: string
+  price: number
+  couponUrl?: string
+}
+
+// 211 Social Services
+export interface SocialService {
+  id: string
+  name: string
+  description: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  phone?: string
+  website?: string
+  categories: string[]
+  eligibility?: string
+}
