@@ -6,14 +6,18 @@ export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, profileContext }: { messages: Message[]; profileContext?: string } =
+    const {
+      messages,
+      profileContext,
+      simpleMode,
+    }: { messages: Message[]; profileContext?: string; simpleMode?: boolean } =
       await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response("messages array is required", { status: 400 });
     }
 
-    const stream = await streamChat(messages, profileContext);
+    const stream = await streamChat(messages, profileContext, simpleMode);
 
     return new Response(stream, {
       headers: {
