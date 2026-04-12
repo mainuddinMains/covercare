@@ -60,7 +60,7 @@ export default function ChatWindow() {
     t.suggestion_clinics(locationLabel || 'near me'),
     t.suggestion_dental,
     t.suggestion_medicaid,
-    t.suggestion_cardiologist(profile.stateCode || 'my state'),
+    t.suggestion_cardiologist(profile.stateCode || ''),
   ]
 
   // Show suggestions on empty state or after the last assistant message when not loading
