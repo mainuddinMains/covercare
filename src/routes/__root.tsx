@@ -11,6 +11,7 @@ import appCss from '../styles.css?url'
 import TabNav from '@/components/layout/TabNav'
 import DisclaimerBanner from '@/components/layout/DisclaimerBanner'
 import PreferencesProvider from '@/components/PreferencesProvider'
+import DataSync from '@/components/DataSync'
 import { getSession } from '@/lib/auth-server'
 
 const PUBLIC_PATHS = ['/', '/login']
@@ -94,6 +95,7 @@ function RootLayout() {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden">
       <PreferencesProvider />
+      <DataSync />
       <DisclaimerBanner />
       <main className="mx-auto w-full max-w-2xl min-h-0 flex-1 overflow-y-auto px-4 pb-20 pt-4">
         <Outlet />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
@@ -7,9 +7,18 @@ import ChatInput from './ChatInput'
 import { CLIENT_TOOLS, TOOL_LABELS } from '@/lib/ai/tools'
 import { buildSystemPrompt } from '@/lib/ai/system-prompt'
 import { useInsuranceStore, usePreferencesStore } from '@/store/appStore'
+import { useSession } from '@/lib/auth-client'
+import { isAuthed } from '@/lib/sync'
+import {
+  getConversations,
+  getConversationMessages,
+  saveConversation,
+  deleteConversation,
+} from '@/lib/server/user-data'
 import { translations } from '@/lib/i18n'
-import { RotateCcw, Loader2, Compass } from 'lucide-react'
+import { RotateCcw, Loader2, Compass, History } from 'lucide-react'
 import ToolResult from './chat/ToolResult'
+import ConversationList from './ConversationList'
 
 function AssistantAvatar() {
   return (
@@ -19,13 +28,36 @@ function AssistantAvatar() {
   )
 }
 
+interface ConversationSummary {
+  id: string
+  title: string
+  updatedAt: Date
+}
+
+function deriveTitle(messages: Array<{ role: string; parts: Array<any> }>): string {
+  const firstUser = messages.find((m) => m.role === 'user')
+  if (!firstUser) return 'New conversation'
+  const text = firstUser.parts
+    .filter((p: any) => p.type === 'text')
+    .map((p: any) => p.content)
+    .join(' ')
+  return text.slice(0, 50) || 'New conversation'
+}
+
 export default function ChatWindow() {
   const profile = useInsuranceStore((s) => s.profile)
   const { simpleMode, locale } = usePreferencesStore()
+  const { data: session } = useSession()
   const t = translations[locale]
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const userScrolledUp = useRef(false)
+
+  // Conversation state
+  const [conversationId, setConversationId] = useState<string>(crypto.randomUUID())
+  const [conversations, setConversations] = useState<ConversationSummary[]>([])
+  const [showHistory, setShowHistory] = useState(false)
+  const loadedConvoRef = useRef<string | null>(null)
 
   const systemPrompt = useMemo(
     () => buildSystemPrompt(profile, simpleMode),
@@ -35,11 +67,61 @@ export default function ChatWindow() {
   const connection = useMemo(() => fetchServerSentEvents('/api/chat'), [])
   const body = useMemo(() => ({ context: systemPrompt }), [systemPrompt])
 
-  const { messages, sendMessage, isLoading, clear } = useChat({
+  const { messages, sendMessage, isLoading, clear, setMessages } = useChat({
     connection,
     tools: CLIENT_TOOLS,
     body,
+    onFinish: () => {
+      if (!isAuthed()) return
+      const currentMessages = messagesRef.current
+      if (currentMessages.length === 0) return
+
+      const title = deriveTitle(currentMessages)
+      saveConversation({
+        data: {
+          id: conversationIdRef.current,
+          title,
+          messages: currentMessages.map((m) => ({
+            id: m.id,
+            role: m.role,
+            parts: JSON.stringify(m.parts),
+            createdAt: new Date().toISOString(),
+          })),
+        },
+      }).then(() => {
+        refreshConversations()
+      }).catch(() => {})
+    },
   })
+
+  // Keep refs in sync for use inside onFinish callback
+  const messagesRef = useRef(messages)
+  messagesRef.current = messages
+  const conversationIdRef = useRef(conversationId)
+  conversationIdRef.current = conversationId
+
+  const refreshConversations = useCallback(() => {
+    if (!isAuthed()) return
+    getConversations()
+      .then((data) => {
+        setConversations(
+          data.map((c) => ({
+            id: c.id,
+            title: c.title,
+            updatedAt: new Date(c.updatedAt),
+          })),
+        )
+      })
+      .catch(() => {})
+  }, [])
+
+  // Load conversation list on mount for authenticated users
+  useEffect(() => {
+    const realUser = session && !session.user.isAnonymous
+    if (realUser) {
+      refreshConversations()
+    }
+  }, [session, refreshConversations])
 
   useEffect(() => {
     if (!userScrolledUp.current) {
@@ -54,6 +136,42 @@ export default function ChatWindow() {
     userScrolledUp.current = distanceFromBottom > 80
   }
 
+  function handleNewConversation() {
+    clear()
+    setConversationId(crypto.randomUUID())
+    loadedConvoRef.current = null
+  }
+
+  async function handleSelectConversation(id: string) {
+    if (id === loadedConvoRef.current) return
+    try {
+      const data = await getConversationMessages({ data: { conversationId: id } })
+      const uiMessages = data.map((m: any) => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        parts: JSON.parse(m.parts),
+      }))
+      setMessages(uiMessages)
+      setConversationId(id)
+      loadedConvoRef.current = id
+    } catch {
+      // If loading fails, stay on current conversation
+    }
+  }
+
+  async function handleDeleteConversation(id: string) {
+    try {
+      await deleteConversation({ data: { id } })
+      setConversations((prev) => prev.filter((c) => c.id !== id))
+      // If we deleted the active conversation, start fresh
+      if (id === conversationId) {
+        handleNewConversation()
+      }
+    } catch {
+      // If delete fails, leave the list as-is
+    }
+  }
+
   const isEmpty = messages.length === 0
   const locationLabel = profile.city || profile.zip || ''
   const suggestions = [
@@ -63,19 +181,42 @@ export default function ChatWindow() {
     t.suggestion_cardiologist(profile.stateCode || ''),
   ]
 
-  // Show suggestions on empty state or after the last assistant message when not loading
   const showSuggestions = isEmpty || (!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant')
+  const canShowHistory = session && !session.user.isAnonymous
+
+  // Show conversation history panel
+  if (showHistory) {
+    return (
+      <div className="flex h-full flex-col">
+        <ConversationList
+          conversations={conversations}
+          activeId={loadedConvoRef.current}
+          onSelect={handleSelectConversation}
+          onDelete={handleDeleteConversation}
+          onClose={() => setShowHistory(false)}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-full flex-col">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="font-heading text-xl font-semibold">{t.nav_chat}</h1>
-        {messages.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={clear}>
-            <RotateCcw size={14} className="mr-1.5" />
-            {t.chat_new_convo}
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {canShowHistory && (
+            <Button variant="ghost" size="sm" onClick={() => setShowHistory(true)}>
+              <History size={14} className="mr-1.5" />
+              {t.chat_history}
+            </Button>
+          )}
+          {messages.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleNewConversation}>
+              <RotateCcw size={14} className="mr-1.5" />
+              {t.chat_new_convo}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 space-y-4 overflow-y-auto pb-4">
@@ -140,7 +281,6 @@ export default function ChatWindow() {
                           output={part.output}
                         />
                       )
-                      // If ToolResult renders something, show it. Otherwise skip silently.
                       if (ui) return <div key={i}>{ui}</div>
                       return null
                     }

@@ -3,6 +3,12 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { InsuranceType } from '@/lib/cost-estimator'
 import type { ScannedCard } from '@/lib/card-scanner'
 import type { Locale } from '@/lib/i18n'
+import { isAuthed } from '@/lib/sync'
+import {
+  saveInsuranceProfile,
+  saveReminder as saveReminderToServer,
+  deleteReminder as deleteReminderFromServer,
+} from '@/lib/server/user-data'
 
 // SSR-safe storage: returns localStorage on client, no-op on server
 const ssrStorage = createJSONStorage(() =>
@@ -53,13 +59,21 @@ interface InsuranceProfileSlice {
   clearProfile: () => void
 }
 
+function syncProfileToServer() {
+  if (!isAuthed()) return
+  const profile = useInsuranceStore.getState().profile
+  saveInsuranceProfile({ data: profile }).catch(() => {})
+}
+
 export const useInsuranceStore = create<InsuranceProfileSlice>()(
   persist(
     (set) => ({
       profile: EMPTY_PROFILE,
-      updateField: (field, value) =>
-        set((s) => ({ profile: { ...s.profile, [field]: value } })),
-      applyScannedCard: (card) =>
+      updateField: (field, value) => {
+        set((s) => ({ profile: { ...s.profile, [field]: value } }))
+        syncProfileToServer()
+      },
+      applyScannedCard: (card) => {
         set((s) => ({
           profile: {
             ...s.profile,
@@ -69,8 +83,13 @@ export const useInsuranceStore = create<InsuranceProfileSlice>()(
             ...(card.groupNumber && { groupNumber: card.groupNumber }),
             ...(card.insurerPhone && { insurerPhone: card.insurerPhone }),
           },
-        })),
-      clearProfile: () => set({ profile: EMPTY_PROFILE }),
+        }))
+        syncProfileToServer()
+      },
+      clearProfile: () => {
+        set({ profile: EMPTY_PROFILE })
+        syncProfileToServer()
+      },
     }),
     { name: 'carecompass:insurance_profile', storage: ssrStorage },
   ),
@@ -111,6 +130,11 @@ function byDate(a: Reminder, b: Reminder) {
   )
 }
 
+function syncReminderToServer(reminder: Reminder) {
+  if (!isAuthed()) return
+  saveReminderToServer({ data: reminder }).catch(() => {})
+}
+
 export const useRemindersStore = create<RemindersSlice>()(
   persist(
     (set) => ({
@@ -123,24 +147,35 @@ export const useRemindersStore = create<RemindersSlice>()(
           createdAt: new Date().toISOString(),
         }
         set((s) => ({ reminders: [...s.reminders, reminder].sort(byDate) }))
+        syncReminderToServer(reminder)
         return reminder
       },
-      updateReminder: (id, patch) =>
+      updateReminder: (id, patch) => {
         set((s) => ({
           reminders: s.reminders
             .map((r) => (r.id === id ? { ...r, ...patch } : r))
             .sort(byDate),
-        })),
-      deleteReminder: (id) =>
+        }))
+        const updated = useRemindersStore.getState().reminders.find((r) => r.id === id)
+        if (updated) syncReminderToServer(updated)
+      },
+      deleteReminder: (id) => {
         set((s) => ({
           reminders: s.reminders.filter((r) => r.id !== id),
-        })),
-      markNotified: (id) =>
+        }))
+        if (isAuthed()) {
+          deleteReminderFromServer({ data: { id } }).catch(() => {})
+        }
+      },
+      markNotified: (id) => {
         set((s) => ({
           reminders: s.reminders.map((r) =>
             r.id === id ? { ...r, notified: true } : r,
           ),
-        })),
+        }))
+        const updated = useRemindersStore.getState().reminders.find((r) => r.id === id)
+        if (updated) syncReminderToServer(updated)
+      },
     }),
     { name: 'carecompass:reminders', storage: ssrStorage },
   ),

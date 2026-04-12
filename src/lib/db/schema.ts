@@ -70,3 +70,66 @@ export const verification = sqliteTable('verification', {
   updatedAt: integer('updated_at', { mode: 'timestamp' })
     .$defaultFn(() => new Date()),
 })
+
+// ── app tables ──
+
+export const insuranceProfile = sqliteTable('insurance_profile', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  insuranceType: text('insurance_type').notNull().default(''),
+  planName: text('plan_name').notNull().default(''),
+  memberId: text('member_id').notNull().default(''),
+  groupNumber: text('group_number').notNull().default(''),
+  insurerPhone: text('insurer_phone').notNull().default(''),
+  effectiveDate: text('effective_date').notNull().default(''),
+  city: text('city').notNull().default(''),
+  state: text('state').notNull().default(''),
+  stateCode: text('state_code').notNull().default(''),
+  zip: text('zip').notNull().default(''),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+export const reminder = sqliteTable('reminder', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  providerName: text('provider_name').notNull(),
+  providerAddress: text('provider_address'),
+  providerPhone: text('provider_phone'),
+  appointmentDate: text('appointment_date').notNull(),
+  appointmentTime: text('appointment_time').notNull(),
+  reminderMinutesBefore: integer('reminder_minutes_before').notNull(),
+  notes: text('notes').notNull().default(''),
+  notified: integer('notified', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at').notNull(),
+})
+
+export const conversation = sqliteTable('conversation', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  title: text('title').notNull().default('New conversation'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+export const message = sqliteTable('message', {
+  id: text('id').primaryKey(),
+  conversationId: text('conversation_id')
+    .notNull()
+    .references(() => conversation.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(),
+  parts: text('parts').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})

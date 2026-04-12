@@ -21,6 +21,9 @@ export const translations = {
     chat_profile_active: 'profile active',
     chat_save_profile: '+ Save insurance profile',
     chat_send: 'Send',
+    chat_history: 'History',
+    chat_no_history: 'No past conversations yet.',
+    chat_delete: 'Delete',
 
     suggestion_clinics: (loc: string) => `Find clinics ${loc}`,
     suggestion_dental: 'What insurance plans cover dental?',
@@ -86,6 +89,9 @@ export const translations = {
     chat_profile_active: 'perfil activo',
     chat_save_profile: '+ Guardar perfil de seguro',
     chat_send: 'Enviar',
+    chat_history: 'Historial',
+    chat_no_history: 'No hay conversaciones anteriores.',
+    chat_delete: 'Eliminar',
 
     suggestion_clinics: (loc: string) => `Encontrar cl\u00ednicas ${loc}`,
     suggestion_dental:

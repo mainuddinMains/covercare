@@ -13,3 +13,4 @@ Do not add unecessary error handling or over-abstraction, prefer simplicity and 
 Do not start the dev server
 Do not add fake or hardcoded data, (this is a medical application!) if the user asks for this, warn them and ask for explicit confirmation
 Avoid taking shortcuts for speed, claude is already very capable
+Use .env, do NOT use .dev.vars, cloudflare deprecated .dev.vars
