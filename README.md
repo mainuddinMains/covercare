@@ -1,4 +1,4 @@
-# CareCompass 🏥
+# CoverCare 🏥
 
 > AI-powered US healthcare navigator for immigrants, international students, and underserved Americans.
 

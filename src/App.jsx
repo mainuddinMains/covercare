@@ -194,7 +194,7 @@ function LoginPage({ onLogin }) {
       <div style={{ maxWidth: 420, width: "100%" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ width: 64, height: 64, borderRadius: 20, background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>⚕</div>
-          <h1 style={{ fontFamily: "'Lora', serif", fontSize: 30, fontWeight: 600, color: C.dark, margin: "0 0 8px" }}>CareCompass</h1>
+          <h1 style={{ fontFamily: "'Lora', serif", fontSize: 30, fontWeight: 600, color: C.dark, margin: "0 0 8px" }}>CoverCare</h1>
           <p style={{ color: C.muted, fontSize: 15, margin: 0 }}>Your US healthcare navigation guide</p>
         </div>
 
@@ -628,7 +628,7 @@ export default function App() {
           <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 50 }}>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div style={{ width: 32, height: 32, borderRadius: 9, background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>⚕</div>
-              <span style={{ fontFamily: "'Lora', serif", fontSize: 18, fontWeight: 600, color: C.dark }}>CareCompass</span>
+              <span style={{ fontFamily: "'Lora', serif", fontSize: 18, fontWeight: 600, color: C.dark }}>CoverCare</span>
             </div>
             {insurance && (
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
