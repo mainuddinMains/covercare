@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@tanstack/ai-code-mode':
+    hash: 2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10
+    path: patches/@tanstack__ai-code-mode.patch
+  '@tanstack/ai-isolate-cloudflare':
+    hash: 47eae182b4bf8390997b7c87ab9485df800b38e4aa944b97936384c3666921f4
+    path: patches/@tanstack__ai-isolate-cloudflare.patch
+
 importers:
 
   .:
@@ -17,12 +25,24 @@ importers:
       '@fontsource/lora':
         specifier: ^5.2.8
         version: 5.2.8
+      '@jitl/quickjs-singlefile-browser-release-asyncify':
+        specifier: 0.31.0
+        version: 0.31.0
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@7.3.2(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/ai':
         specifier: ^0.10.1
         version: 0.10.1
+      '@tanstack/ai-code-mode':
+        specifier: ^0.1.2
+        version: 0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6)
+      '@tanstack/ai-isolate-cloudflare':
+        specifier: ^0.1.2
+        version: 0.1.2(patch_hash=47eae182b4bf8390997b7c87ab9485df800b38e4aa944b97936384c3666921f4)(@tanstack/ai@0.10.1)(zod@4.3.6)
+      '@tanstack/ai-isolate-quickjs':
+        specifier: ^0.1.2
+        version: 0.1.2(@tanstack/ai-code-mode@0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6))
       '@tanstack/ai-openrouter':
         specifier: ^0.7.3
         version: 0.7.3(@tanstack/ai@0.10.1)
@@ -50,6 +70,9 @@ importers:
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
+      quickjs-emscripten-core:
+        specifier: 0.31.0
+        version: 0.31.0
       radix-ui:
         specifier: ^1.4.3
         version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -68,6 +91,9 @@ importers:
       shadcn:
         specifier: ^4.2.0
         version: 4.2.0(typescript@5.9.3)
+      sucrase:
+        specifier: ^3.35.1
+        version: 3.35.1
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -1310,6 +1336,24 @@ packages:
       '@types/node':
         optional: true
 
+  '@jitl/quickjs-ffi-types@0.31.0':
+    resolution: {integrity: sha512-1yrgvXlmXH2oNj3eFTrkwacGJbmM0crwipA3ohCrjv52gBeDaD7PsTvFYinlAnqU8iPME3LGP437yk05a2oejw==}
+
+  '@jitl/quickjs-singlefile-browser-release-asyncify@0.31.0':
+    resolution: {integrity: sha512-w0Ov2rmoGSsSrSosLQMEKpzgVfz2TcNSlJcjMDSqns6YuXpBMFYcAEHklQ6p5xwK2o70RbVf+pietG3K/ZAwow==}
+
+  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
+    resolution: {integrity: sha512-YkdzQdr1uaftFhgEnTRjTTZHk2SFZdpWO7XhOmRVbi6CEVsH9g5oNF8Ta1q3OuSJHRwwT8YsuR1YzEiEIJEk6w==}
+
+  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
+    resolution: {integrity: sha512-8XvloaaWBONqcHXYs5tWOjdhQVxzULilIfB2hvZfS6S+fI4m2+lFiwQy7xeP8ExHmiZ7D8gZGChNkdLgjGfknw==}
+
+  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
+    resolution: {integrity: sha512-uz0BbQYTxNsFkvkurd7vk2dOg57ElTBLCuvNtRl4rgrtbC++NIndD5qv2+AXb6yXDD3Uy1O2PCwmoaH0eXgEOg==}
+
+  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
+    resolution: {integrity: sha512-hYduecOByj9AsAfsJhZh5nA6exokmuFC8cls39+lYmTCGY51bgjJJJwReEu7Ff7vBWaQCL6TeDdVlnp2WYz0jw==}
+
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
@@ -2380,10 +2424,26 @@ packages:
   '@tanstack/ai-client@0.7.8':
     resolution: {integrity: sha512-va69Dhl5WPc+cJgiI/Bq9TaxBTPy9BEc/ArcFBhQPtpkv7MX3wldxn4Z6lDvYH32xAc4OjEBF9Ebq3KBP78oAA==}
 
+  '@tanstack/ai-code-mode@0.1.2':
+    resolution: {integrity: sha512-Ce3OZHkMAFh3h1dw9kPYDh8oIJPNi/gzAibLlisqBEO/sqe2Y3swvcHvovxnKeatEd8saVzOnPRDtCIRKuARyA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@tanstack/ai': 0.10.2
+      zod: ^3.0.0 || ^4.0.0
+
   '@tanstack/ai-event-client@0.2.1':
     resolution: {integrity: sha512-uq3fCZlmQmkrDeGTX1Nt1i4DrXqmF9SPeR598sWo5+FU7+hWaevRLOoWAl/Vkxuh+3+vQofoLCztJSa7QwBEAg==}
     peerDependencies:
       '@tanstack/ai': 0.10.1
+
+  '@tanstack/ai-isolate-cloudflare@0.1.2':
+    resolution: {integrity: sha512-RE41mw/2HpADzmBPXS5uV8aGRI7Hi8OlrxLESUNNJKgJLHO5frQ6rOzo+/RVdbAgSDZpEhNL2KvpmdibsFOzrg==}
+    engines: {node: '>=18'}
+
+  '@tanstack/ai-isolate-quickjs@0.1.2':
+    resolution: {integrity: sha512-Er0ggIhb0oRwolluJmR8PGGPukW/EE1NBL//XlRrTaF+26efbYwSRApxd0yFOXUk3uREfqPeSEkj7yMBx2Jllg==}
+    peerDependencies:
+      '@tanstack/ai-code-mode': 0.1.2
 
   '@tanstack/ai-openrouter@0.7.3':
     resolution: {integrity: sha512-OY7QYgIuEzOtBjl68kD90LwfSt0IMKduQsKrgBVWFR3llVcf2/jTDLGW4EJSPIPRHefr49WgLvSohegrjLSRgg==}
@@ -2815,6 +2875,9 @@ packages:
     resolution: {integrity: sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig==}
     engines: {node: '>=14'}
 
+  any-promise@1.3.0:
+    resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
+
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
@@ -3041,6 +3104,10 @@ packages:
   commander@14.0.3:
     resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
     engines: {node: '>=20'}
+
+  commander@4.1.1:
+    resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
+    engines: {node: '>= 6'}
 
   comment-parser@1.4.6:
     resolution: {integrity: sha512-ObxuY6vnbWTN6Od72xfwN9DbzC7Y2vv8u1Soi9ahRKL37gb6y1qk6/dgjs+3JWuXJHWvsg3BXIwzd/rkmAwavg==}
@@ -4230,6 +4297,9 @@ packages:
     resolution: {integrity: sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
+  mz@2.7.0:
+    resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
+
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -4394,6 +4464,10 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
+  pirates@4.0.7:
+    resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
+    engines: {node: '>= 6'}
+
   pkce-challenge@5.0.1:
     resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
     engines: {node: '>=16.20.0'}
@@ -4450,6 +4524,13 @@ packages:
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+
+  quickjs-emscripten-core@0.31.0:
+    resolution: {integrity: sha512-oQz8p0SiKDBc1TC7ZBK2fr0GoSHZKA0jZIeXxsnCyCs4y32FStzCW4d1h6E1sE0uHDMbGITbk2zhNaytaoJwXQ==}
+
+  quickjs-emscripten@0.31.0:
+    resolution: {integrity: sha512-K7Yt78aRPLjPcqv3fIuLW1jW3pvwO21B9pmFOolsjM/57ZhdVXBr51GqJpalgBlkPu9foAvhEAuuQPnvIGvLvQ==}
+    engines: {node: '>=16.0.0'}
 
   radix-ui@1.4.3:
     resolution: {integrity: sha512-aWizCQiyeAenIdUbqEpXgRA1ya65P13NKn/W8rWkcN0OPkRDxdBVLWnIEDsS2RpwCK2nobI7oMUSmexzTDyAmA==}
@@ -4749,6 +4830,11 @@ packages:
   style-to-object@1.0.14:
     resolution: {integrity: sha512-LIN7rULI0jBscWQYaSswptyderlarFkjQ+t79nzty8tcIAceVomEVlLzH5VP4Cmsv6MtKhs7qaAiwlcp+Mgaxw==}
 
+  sucrase@3.35.1:
+    resolution: {integrity: sha512-DhuTmvZWux4H1UOnWMB3sk0sbaCVOoQZjv8u1rDoTV0HTdGem9hkAZtl4JZy8P2z4Bg0nT+YMeOFyVr4zcG5Tw==}
+    engines: {node: '>=16 || 14 >=14.17'}
+    hasBin: true
+
   supports-color@10.2.2:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
@@ -4766,6 +4852,13 @@ packages:
   tapable@2.3.2:
     resolution: {integrity: sha512-1MOpMXuhGzGL5TTCZFItxCc0AARf1EZFQkGqMm7ERKj8+Hgr5oLvJOVFcC+lRmR8hCe2S3jC4T5D7Vg/d7/fhA==}
     engines: {node: '>=6'}
+
+  thenify-all@1.6.0:
+    resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
+    engines: {node: '>=0.8'}
+
+  thenify@3.3.1:
+    resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -4809,6 +4902,9 @@ packages:
     resolution: {integrity: sha512-EDyGAwH1gO0Ausm9gV6T2nUvBgXT5kGoCMJPllOaooZ+4VvJiKBdZE7wK18N1deEowhcUptS+5GXZK8U/fvpwA==}
     peerDependencies:
       typescript: '>=4.0.0'
+
+  ts-interface-checker@0.1.13:
+    resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
   ts-morph@26.0.0:
     resolution: {integrity: sha512-ztMO++owQnz8c/gIENcM9XfCEzgoGphTv+nKpYNM1bgsdOVC/jRZuEBf6N+mLLDNg68Kl+GgUZfOySaRiG1/Ug==}
@@ -6011,6 +6107,28 @@ snapshots:
 
   '@inquirer/type@3.0.10': {}
 
+  '@jitl/quickjs-ffi-types@0.31.0': {}
+
+  '@jitl/quickjs-singlefile-browser-release-asyncify@0.31.0':
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
+  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
+  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
+  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
+  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -7064,10 +7182,28 @@ snapshots:
       '@tanstack/ai': 0.10.1
       '@tanstack/ai-event-client': 0.2.1(@tanstack/ai@0.10.1)
 
+  '@tanstack/ai-code-mode@0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6)':
+    dependencies:
+      '@tanstack/ai': 0.10.1
+      esbuild: 0.25.12
+      zod: 4.3.6
+
   '@tanstack/ai-event-client@0.2.1(@tanstack/ai@0.10.1)':
     dependencies:
       '@tanstack/ai': 0.10.1
       '@tanstack/devtools-event-client': 0.4.3
+
+  '@tanstack/ai-isolate-cloudflare@0.1.2(patch_hash=47eae182b4bf8390997b7c87ab9485df800b38e4aa944b97936384c3666921f4)(@tanstack/ai@0.10.1)(zod@4.3.6)':
+    dependencies:
+      '@tanstack/ai-code-mode': 0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6)
+    transitivePeerDependencies:
+      - '@tanstack/ai'
+      - zod
+
+  '@tanstack/ai-isolate-quickjs@0.1.2(@tanstack/ai-code-mode@0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6))':
+    dependencies:
+      '@tanstack/ai-code-mode': 0.1.2(patch_hash=2f6e3366762c60bb55788d801ae5b10f060d78a18661a9d31ad66e7e0646cf10)(@tanstack/ai@0.10.1)(zod@4.3.6)
+      quickjs-emscripten: 0.31.0
 
   '@tanstack/ai-openrouter@0.7.3(@tanstack/ai@0.10.1)':
     dependencies:
@@ -7578,6 +7714,8 @@ snapshots:
 
   ansis@4.2.0: {}
 
+  any-promise@1.3.0: {}
+
   anymatch@3.1.3:
     dependencies:
       normalize-path: 3.0.0
@@ -7784,6 +7922,8 @@ snapshots:
   commander@11.1.0: {}
 
   commander@14.0.3: {}
+
+  commander@4.1.1: {}
 
   comment-parser@1.4.6: {}
 
@@ -9133,6 +9273,12 @@ snapshots:
 
   mute-stream@2.0.0: {}
 
+  mz@2.7.0:
+    dependencies:
+      any-promise: 1.3.0
+      object-assign: 4.1.1
+      thenify-all: 1.6.0
+
   nanoid@3.3.11: {}
 
   nanostores@1.2.0: {}
@@ -9290,6 +9436,8 @@ snapshots:
 
   picomatch@4.0.4: {}
 
+  pirates@4.0.7: {}
+
   pkce-challenge@5.0.1: {}
 
   portless@0.6.0:
@@ -9336,6 +9484,18 @@ snapshots:
       side-channel: 1.1.0
 
   queue-microtask@1.2.3: {}
+
+  quickjs-emscripten-core@0.31.0:
+    dependencies:
+      '@jitl/quickjs-ffi-types': 0.31.0
+
+  quickjs-emscripten@0.31.0:
+    dependencies:
+      '@jitl/quickjs-wasmfile-debug-asyncify': 0.31.0
+      '@jitl/quickjs-wasmfile-debug-sync': 0.31.0
+      '@jitl/quickjs-wasmfile-release-asyncify': 0.31.0
+      '@jitl/quickjs-wasmfile-release-sync': 0.31.0
+      quickjs-emscripten-core: 0.31.0
 
   radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
@@ -9802,6 +9962,16 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
+  sucrase@3.35.1:
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.13
+      commander: 4.1.1
+      lines-and-columns: 1.2.4
+      mz: 2.7.0
+      pirates: 4.0.7
+      tinyglobby: 0.2.16
+      ts-interface-checker: 0.1.13
+
   supports-color@10.2.2: {}
 
   tagged-tag@1.0.0: {}
@@ -9811,6 +9981,14 @@ snapshots:
   tailwindcss@4.2.2: {}
 
   tapable@2.3.2: {}
+
+  thenify-all@1.6.0:
+    dependencies:
+      thenify: 3.3.1
+
+  thenify@3.3.1:
+    dependencies:
+      any-promise: 1.3.0
 
   tiny-invariant@1.3.3: {}
 
@@ -9847,6 +10025,8 @@ snapshots:
     dependencies:
       picomatch: 4.0.4
       typescript: 5.9.3
+
+  ts-interface-checker@0.1.13: {}
 
   ts-morph@26.0.0:
     dependencies:

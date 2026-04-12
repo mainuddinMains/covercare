@@ -10,11 +10,21 @@ import {
   ChevronUp,
   Stethoscope,
   Video,
+  ShieldCheck,
+  ShieldX,
+  CircleDollarSign,
+  HeartHandshake,
+  Pill,
+  Globe,
+  Check,
+  X,
 } from 'lucide-react'
 import type { CMSHospital, HospitalSearchResult } from '@/lib/cms-hospitals'
 import type { CMSPhysician, PhysicianSearchResult } from '@/lib/cms-physicians'
 import type { CostEstimate } from '@/lib/cost-estimator'
-import type { HospitalPrice } from '@/lib/types'
+import type { HospitalPrice, Clinic } from '@/lib/types'
+import type { EligibilityResult } from '@/lib/assistance-eligibility'
+import type { DrugInfo, DrugAlternative } from '@/lib/fda-drugs'
 
 interface Props {
   name: string
@@ -35,6 +45,29 @@ export default function ToolResult({ name, output }: Props) {
       return (
         <HospitalPriceResults
           data={output as { prices: HospitalPrice[] } | { error: string }}
+        />
+      )
+    case 'check_assistance_eligibility':
+      return (
+        <EligibilityResultCard
+          data={output as EligibilityResult | { error: string }}
+        />
+      )
+    case 'find_community_health_centers':
+      return (
+        <HealthCenterResults
+          data={output as { clinics: Clinic[] } | { error: string }}
+        />
+      )
+    case 'search_drug_info':
+      return (
+        <DrugInfoResults
+          data={
+            output as
+              | { results: DrugInfo[] }
+              | { alternatives: DrugAlternative[] }
+              | { error: string }
+          }
         />
       )
     case 'detect_location':
@@ -352,6 +385,302 @@ function HospitalPriceResults({
           ) : (
             <>
               Show {prices.length - 3} more
+              <ChevronDown size={12} />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Eligibility Result ──
+
+function EligibilityResultCard({
+  data,
+}: {
+  data: EligibilityResult | { error: string }
+}) {
+  if ('error' in data) return null
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-2.5">
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+          <HeartHandshake size={14} className="text-primary" />
+        </div>
+        <div>
+          <p className="text-[13px] font-semibold">Financial Assistance Check</p>
+          <p className="text-[10px] text-muted-foreground">
+            {data.fplPercentage}% of Federal Poverty Level
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-1.5">
+        <EligibilityRow
+          icon={data.medicaid.likelyEligible ? ShieldCheck : ShieldX}
+          label="Medicaid"
+          eligible={data.medicaid.likelyEligible}
+          note={data.medicaid.note}
+        />
+        <EligibilityRow
+          icon={CircleDollarSign}
+          label="Sliding-scale fees"
+          eligible={data.slidingScale.eligible}
+          note={data.slidingScale.note}
+          highlight={data.slidingScale.bracket?.label}
+        />
+        <EligibilityRow
+          icon={ShieldCheck}
+          label="ACA subsidies"
+          eligible={data.acaSubsidy.eligible}
+          note={data.acaSubsidy.note}
+        />
+      </div>
+
+      {data.coverageGap && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-2 dark:border-amber-700 dark:bg-amber-950/30">
+          <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200">
+            You may be in the coverage gap. Community health centers can still help.
+          </p>
+        </div>
+      )}
+
+      <div className="rounded-lg bg-primary/5 p-2">
+        <p className="text-[11px] font-medium text-primary">
+          {data.topRecommendation}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function EligibilityRow({
+  icon: Icon,
+  label,
+  eligible,
+  note,
+  highlight,
+}: {
+  icon: typeof ShieldCheck
+  label: string
+  eligible: boolean
+  note: string
+  highlight?: string
+}) {
+  return (
+    <div className="rounded-lg bg-muted/60 p-2">
+      <div className="mb-0.5 flex items-center gap-1.5">
+        <Icon
+          size={12}
+          className={eligible ? 'text-emerald-600' : 'text-muted-foreground'}
+        />
+        <span className="text-[12px] font-medium">{label}</span>
+        {eligible ? (
+          <span className="flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <Check size={8} />
+            {highlight ?? 'Likely eligible'}
+          </span>
+        ) : (
+          <span className="flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+            <X size={8} />
+            Unlikely
+          </span>
+        )}
+      </div>
+      <p className="text-[10px] text-muted-foreground">{note}</p>
+    </div>
+  )
+}
+
+// ── Health Center Results ──
+
+function HealthCenterResults({
+  data,
+}: {
+  data: { clinics: Clinic[] } | { error: string }
+}) {
+  const [expanded, setExpanded] = useState(false)
+  if ('error' in data) return null
+  const { clinics } = data
+  if (!clinics?.length) return null
+
+  const visible = expanded ? clinics : clinics.slice(0, 3)
+  const hasMore = clinics.length > 3
+
+  return (
+    <div className="space-y-2">
+      <div className="grid gap-2">
+        {visible.map((c) => (
+          <div
+            key={c.id}
+            className="rounded-xl border border-border bg-card p-3"
+          >
+            <div className="mb-1.5 flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold leading-tight">
+                  {c.name}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  {c.address}, {c.city}, {c.state} {c.zip}
+                </p>
+              </div>
+              <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <CircleDollarSign size={9} />
+                Sliding scale
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-muted-foreground">
+              {c.phone && (
+                <a
+                  href={`tel:${c.phone}`}
+                  className="flex items-center gap-0.5 text-primary hover:underline"
+                >
+                  <Phone size={10} />
+                  {c.phone}
+                </a>
+              )}
+              {c.url && (
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-0.5 text-primary hover:underline"
+                >
+                  <Globe size={10} />
+                  Website
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex w-full items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        >
+          {expanded ? (
+            <>
+              Show less
+              <ChevronUp size={12} />
+            </>
+          ) : (
+            <>
+              Show {clinics.length - 3} more
+              <ChevronDown size={12} />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Drug Info Results ──
+
+function DrugInfoResults({
+  data,
+}: {
+  data:
+    | { results: DrugInfo[] }
+    | { alternatives: DrugAlternative[] }
+    | { error: string }
+}) {
+  const [expanded, setExpanded] = useState(false)
+  if ('error' in data) return null
+
+  if ('alternatives' in data) {
+    const { alternatives } = data
+    if (!alternatives?.length) return null
+
+    return (
+      <div className="space-y-2">
+        <div className="grid gap-2">
+          {alternatives.map((a, i) => (
+            <div
+              key={i}
+              className="rounded-xl border border-border bg-card p-3"
+            >
+              <p className="text-[13px] font-semibold">{a.brandName}</p>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                {a.genericName && (
+                  <span>Generic: {a.genericName}</span>
+                )}
+                {a.form && <span>{a.form}</span>}
+                {a.route && <span>{a.route}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const { results } = data
+  if (!results?.length) return null
+
+  const visible = expanded ? results : results.slice(0, 3)
+  const hasMore = results.length > 3
+
+  return (
+    <div className="space-y-2">
+      <div className="grid gap-2">
+        {visible.map((d, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-border bg-card p-3"
+          >
+            <div className="mb-1.5 flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold leading-tight">
+                  {d.brandName}
+                </p>
+                {d.genericName && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Generic: {d.genericName}
+                  </p>
+                )}
+              </div>
+              {d.isGenericAvailable && (
+                <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <Pill size={9} />
+                  Generic available
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+              {d.dosageForms.length > 0 && (
+                <span>{d.dosageForms.join(', ')}</span>
+              )}
+              {d.routes.length > 0 && (
+                <span>{d.routes.join(', ')}</span>
+              )}
+            </div>
+            {d.purpose && (
+              <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">
+                {d.purpose}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex w-full items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        >
+          {expanded ? (
+            <>
+              Show less
+              <ChevronUp size={12} />
+            </>
+          ) : (
+            <>
+              Show {results.length - 3} more
               <ChevronDown size={12} />
             </>
           )}

@@ -1,0 +1,16 @@
+diff --git a/dist/esm/isolate-driver.js b/dist/esm/isolate-driver.js
+index 9b082cc..010ba0c 100644
+--- a/dist/esm/isolate-driver.js
++++ b/dist/esm/isolate-driver.js
+@@ -108,8 +108,9 @@ class CloudflareIsolateContext {
+                 // status === 'need_tools'
+                 // Collect logs from this round
+                 allLogs = [...allLogs, ...result.logs];
+-                // Execute tool calls locally
+-                toolResults = {};
++                // Execute tool calls locally (accumulate across rounds
++                // so sequential await chains can resolve earlier results)
++                if (!toolResults) toolResults = {};
+                 for (const toolCall of result.toolCalls) {
+                     const binding = this.bindings[toolCall.name];
+                     if (!binding) {

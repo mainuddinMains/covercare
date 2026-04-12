@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "care-compass-code-executor",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "index.ts",
+	"unsafe": {
+		"bindings": [
+			{
+				"name": "UNSAFE_EVAL",
+				"type": "unsafe_eval"
+			}
+		]
+	},
+	// miniflare config for local dev -- wires the unsafeEvalBinding
+	"miniflare": {
+		"unsafeEvalBinding": "UNSAFE_EVAL"
+	}
+}
