@@ -46,6 +46,22 @@ export const translations = {
     footer_disclaimer:
       'CareCompass provides general guidance only \u2014 not medical advice.',
     footer_emergency: '911 for emergencies.',
+
+    auth_title: 'CareCompass',
+    auth_subtitle: 'Your US healthcare navigation guide',
+    auth_login: 'Log In',
+    auth_signup: 'Sign Up',
+    auth_name_label: 'Full Name',
+    auth_name_placeholder: 'Your name',
+    auth_email_label: 'Email',
+    auth_email_placeholder: 'you@example.com',
+    auth_password_label: 'Password',
+    auth_password_placeholder: 'At least 8 characters',
+    auth_login_button: 'Log In',
+    auth_signup_button: 'Create Account',
+    auth_footer: 'Navigate US healthcare with confidence.',
+    auth_error_generic: 'Something went wrong. Please try again.',
+    auth_logout: 'Log Out',
   },
 
   es: {
@@ -95,6 +111,22 @@ export const translations = {
     footer_disclaimer:
       'CareCompass ofrece orientaci\u00f3n general \u00fanicamente \u2014 no es consejo m\u00e9dico.',
     footer_emergency: '911 en emergencias.',
+
+    auth_title: 'CareCompass',
+    auth_subtitle: 'Tu gu\u00eda de navegaci\u00f3n de salud en EE.UU.',
+    auth_login: 'Iniciar Sesi\u00f3n',
+    auth_signup: 'Registrarse',
+    auth_name_label: 'Nombre Completo',
+    auth_name_placeholder: 'Tu nombre',
+    auth_email_label: 'Correo Electr\u00f3nico',
+    auth_email_placeholder: 'tu@ejemplo.com',
+    auth_password_label: 'Contrase\u00f1a',
+    auth_password_placeholder: 'Al menos 8 caracteres',
+    auth_login_button: 'Iniciar Sesi\u00f3n',
+    auth_signup_button: 'Crear Cuenta',
+    auth_footer: 'Navega el sistema de salud de EE.UU. con confianza.',
+    auth_error_generic: 'Algo sali\u00f3 mal. Int\u00e9ntalo de nuevo.',
+    auth_logout: 'Cerrar Sesi\u00f3n',
   },
 } as const
 

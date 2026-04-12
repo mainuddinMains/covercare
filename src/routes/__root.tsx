@@ -3,12 +3,16 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useLocation,
+  useNavigate,
 } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import appCss from '../styles.css?url'
 import TabNav from '@/components/layout/TabNav'
 import DisclaimerBanner from '@/components/layout/DisclaimerBanner'
 import PreferencesProvider from '@/components/PreferencesProvider'
+import { useSession } from '@/lib/auth-client'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -65,6 +69,40 @@ function RootError({ error, reset }: ErrorComponentProps) {
 }
 
 function RootLayout() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { data: session, isPending } = useSession()
+  const isLoginPage = location.pathname === '/login'
+
+  useEffect(() => {
+    if (isPending) return
+    if (!session && !isLoginPage) {
+      navigate({ to: '/login' })
+    }
+    if (session && isLoginPage) {
+      navigate({ to: '/' })
+    }
+  }, [session, isPending, isLoginPage, navigate])
+
+  // Login page gets a clean layout with no chrome
+  if (isLoginPage) {
+    return (
+      <>
+        <PreferencesProvider />
+        <Outlet />
+      </>
+    )
+  }
+
+  // While checking auth, show nothing to avoid flash
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <PreferencesProvider />
