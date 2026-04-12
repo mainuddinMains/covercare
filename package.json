@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "drizzle-kit generate && wrangler d1 migrations apply care-compass-db --local && portless care-compass vite dev",
+    "bri": "drizzle-kit generate && wrangler d1 migrations apply care-compass-db --local && vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vite build && wrangler deploy",
