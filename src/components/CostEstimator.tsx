@@ -163,24 +163,36 @@ export default function CostEstimator() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-[10px] font-medium uppercase text-muted-foreground">
-                  Your estimated cost
+            {result.medicareRate != null ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                    Your estimated cost
+                  </p>
+                  <p className="text-lg font-bold text-primary">
+                    ${result.outOfPocketLow} - ${result.outOfPocketHigh}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                    Total billed
+                  </p>
+                  <p className="text-lg font-bold">
+                    ${result.totalEstimatedCost?.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Cost data not available
                 </p>
-                <p className="text-lg font-bold text-primary">
-                  ${result.outOfPocketLow} - ${result.outOfPocketHigh}
+                <p className="mt-1 text-xs text-muted-foreground">
+                  CMS does not publish a rate for this procedure.
+                  Contact your insurer directly for a cost estimate.
                 </p>
               </div>
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-[10px] font-medium uppercase text-muted-foreground">
-                  Total billed
-                </p>
-                <p className="text-lg font-bold">
-                  ${result.totalEstimatedCost.toLocaleString()}
-                </p>
-              </div>
-            </div>
+            )}
 
             <p className="text-xs text-muted-foreground">{result.note}</p>
             <p className="text-[10px] text-muted-foreground">

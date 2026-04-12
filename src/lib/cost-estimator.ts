@@ -75,10 +75,10 @@ const INSURANCE_CONFIG: Record<
 export interface CostEstimate {
   procedure: string
   cpt: string
-  medicareRate: number
-  totalEstimatedCost: number
-  outOfPocketLow: number
-  outOfPocketHigh: number
+  medicareRate: number | null
+  totalEstimatedCost: number | null
+  outOfPocketLow: number | null
+  outOfPocketHigh: number | null
   insurance: InsuranceType
   insuranceLabel: string
   note: string
@@ -110,17 +110,6 @@ async function getMedicareRate(cpt: string): Promise<number | null> {
   }
 }
 
-const FALLBACK_RATES: Record<string, number> = {
-  '59400': 2300,
-  '59510': 3200,
-  '27447': 1850,
-  '27130': 1800,
-  '44950': 650,
-  '47562': 800,
-  '66984': 600,
-  G0439: 95,
-}
-
 export async function estimateCost(
   procedureKey: string,
   insurance: InsuranceType,
@@ -129,9 +118,22 @@ export async function estimateCost(
   if (!proc) throw new Error(`Unknown procedure: ${procedureKey}`)
 
   const config = INSURANCE_CONFIG[insurance]
+  const medicareRate = await getMedicareRate(proc.cpt)
 
-  let medicareRate = await getMedicareRate(proc.cpt)
-  if (!medicareRate) medicareRate = FALLBACK_RATES[proc.cpt] ?? 100
+  if (!medicareRate) {
+    return {
+      procedure: proc.name,
+      cpt: proc.cpt,
+      medicareRate: null,
+      totalEstimatedCost: null,
+      outOfPocketLow: null,
+      outOfPocketHigh: null,
+      insurance,
+      insuranceLabel: INSURANCE_LABELS[insurance],
+      note: 'CMS does not have rate data for this procedure. Contact your insurer for a cost estimate.',
+      source: 'CMS Medicare Physician Fee Schedule',
+    }
+  }
 
   const totalCost = medicareRate * config.totalCostMultiplier
 
@@ -151,6 +153,6 @@ export async function estimateCost(
     insurance,
     insuranceLabel: INSURANCE_LABELS[insurance],
     note: config.note,
-    source: 'CMS Medicare Physician Fee Schedule (2024)',
+    source: 'CMS Medicare Physician Fee Schedule',
   }
 }
