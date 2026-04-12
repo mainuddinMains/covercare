@@ -2,19 +2,40 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Message } from "@/types";
+import { useInsuranceProfile } from "@/hooks/useInsuranceProfile";
+import { INSURANCE_LABELS } from "@/lib/cost-estimator";
+import { useLanguage } from "@/contexts/language";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 
-const WELCOME: Message = {
-  role: "assistant",
-  content:
-    "Hi! I'm your CoverCare assistant. I can help you find affordable clinics, compare insurance plans, and look up healthcare providers. What can I help you with today?",
-};
-
 export default function ChatWindow() {
+  const { profile, hasProfile, hasLocation, locationDisplay } = useInsuranceProfile();
+  const { t } = useLanguage();
+
+  const WELCOME: Message = {
+    role: "assistant",
+    content: t.chat_welcome,
+  };
+
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Build a natural-language summary of the saved profile to inject into the system prompt
+  function buildProfileContext(): string | undefined {
+    if (!hasProfile && !hasLocation) return undefined;
+    const parts: string[] = [];
+    if (profile.insuranceType) parts.push(`Insurance type: ${INSURANCE_LABELS[profile.insuranceType]}`);
+    if (profile.planName)      parts.push(`Plan name: ${profile.planName}`);
+    if (profile.memberId)      parts.push(`Member ID: ${profile.memberId}`);
+    if (profile.groupNumber)   parts.push(`Group number: ${profile.groupNumber}`);
+    if (profile.insurerPhone)  parts.push(`Insurer phone: ${profile.insurerPhone}`);
+    if (profile.effectiveDate) parts.push(`Effective date: ${profile.effectiveDate}`);
+    if (hasLocation)           parts.push(`User's location: ${locationDisplay}`);
+    if (profile.zip)           parts.push(`ZIP code: ${profile.zip}`);
+    if (profile.stateCode)     parts.push(`State: ${profile.state} (${profile.stateCode})`);
+    return parts.join("\n");
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +61,7 @@ export default function ChatWindow() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: payload }),
+        body: JSON.stringify({ messages: payload, profileContext: buildProfileContext() }),
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -88,18 +109,23 @@ export default function ChatWindow() {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">CoverCare</h1>
-          <p className="text-xs text-gray-500">Healthcare navigation assistant</p>
-        </div>
+    <div className="flex flex-col flex-1 max-w-2xl mx-auto w-full">
+      {/* Chat toolbar */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-white">
+        {hasProfile ? (
+          <a href="/profile" className="text-xs text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-full hover:bg-green-100 transition-colors">
+            {profile.insuranceType ? `${INSURANCE_LABELS[profile.insuranceType]} · ${t.chat_profile_active}` : t.chat_profile_active}
+          </a>
+        ) : (
+          <a href="/profile" className="text-xs text-gray-400 hover:text-blue-600 transition-colors">
+            {t.chat_save_profile}
+          </a>
+        )}
         <button
           onClick={clearHistory}
           className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
         >
-          New conversation
+          {t.chat_new_convo}
         </button>
       </div>
 
