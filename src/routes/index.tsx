@@ -20,43 +20,43 @@ import { translations } from '@/lib/i18n'
 
 export const Route = createFileRoute('/')({ component: LandingPage })
 
-const FEATURES = [
-  {
-    icon: MessageCircle,
-    title: 'AI Chat Guidance',
-    desc: 'Cut through the jargon. Get clear, actionable answers to your healthcare questions in plain language.',
-    to: '/chat',
-  },
-  {
-    icon: Calculator,
-    title: 'Cost Estimator',
-    desc: "Know what you'll owe before you go. Estimate out-of-pocket expenses using verified CMS Medicare data.",
-    to: '/cost-estimator',
-  },
-  {
-    icon: Building2,
-    title: 'Find Facilities',
-    desc: 'Locate the right care, fast. Search nearby hospitals filtered by specialty, quality, and network acceptance.',
-    to: '/hospitals',
-  },
-  {
-    icon: BookOpen,
-    title: 'Insurance Literacy',
-    desc: 'Demystify the fine print. Learn exactly how copays, deductibles, and networks impact your wallet.',
-    to: '/learn',
-  },
-]
-
-const TRUST_PILLS = [
-  { icon: Shield, label: 'HIPAA Compliant' },
-  { icon: Users, label: '100% Free' },
-  { icon: Sparkles, label: 'AI Powered' },
-]
-
 function LandingPage() {
   const locale = usePreferencesStore((s) => s.locale)
   const t = translations[locale]
   const navigate = useNavigate()
+
+  const FEATURES = [
+    {
+      icon: MessageCircle,
+      title: t.landing_feature_chat_title,
+      desc: t.landing_feature_chat_desc,
+      to: '/chat',
+    },
+    {
+      icon: Calculator,
+      title: t.landing_feature_cost_title,
+      desc: t.landing_feature_cost_desc,
+      to: '/cost-estimator',
+    },
+    {
+      icon: Building2,
+      title: t.landing_feature_facilities_title,
+      desc: t.landing_feature_facilities_desc,
+      to: '/hospitals',
+    },
+    {
+      icon: BookOpen,
+      title: t.landing_feature_literacy_title,
+      desc: t.landing_feature_literacy_desc,
+      to: '/learn',
+    },
+  ]
+
+  const TRUST_PILLS = [
+    { icon: Shield, label: t.landing_trust_hipaa },
+    { icon: Users, label: t.landing_trust_free },
+    { icon: Sparkles, label: t.landing_trust_ai },
+  ]
   const [guestLoading, setGuestLoading] = useState(false)
   const [guestError, setGuestError] = useState<string | null>(null)
 
@@ -65,7 +65,7 @@ function LandingPage() {
     setGuestError(null)
     const { error } = await authClient.signIn.anonymous()
     if (error) {
-      setGuestError('Could not continue as guest. Please try again.')
+      setGuestError(t.landing_guest_error)
       setGuestLoading(false)
       return
     }
@@ -84,10 +84,10 @@ function LandingPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">
-                In an emergency? Call <span className="text-destructive">911</span>
+                {t.landing_emergency_heading} <span className="text-destructive">911</span>
               </p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                ERs are federally required to treat you regardless of insurance or immigration status.
+                {t.landing_emergency_detail}
               </p>
             </div>
           </div>
@@ -96,7 +96,7 @@ function LandingPage() {
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-destructive px-5 text-sm font-semibold text-white shadow-md shadow-destructive/20 transition-colors hover:bg-destructive/90"
           >
             <Phone size={15} className="mr-2" />
-            Call 911
+            {t.landing_call_911}
           </a>
         </div>
       </div>
@@ -123,7 +123,7 @@ function LandingPage() {
               className="h-12 w-full rounded-xl px-8 text-sm font-semibold shadow-lg shadow-primary/20 transition-shadow hover:shadow-xl hover:shadow-primary/25 sm:w-auto"
             >
               <Link to="/login">
-                Get Started Free
+                {t.landing_get_started}
                 <ArrowRight size={16} className="ml-2" />
               </Link>
             </Button>
@@ -165,7 +165,7 @@ function LandingPage() {
         <div className="mx-auto flex w-full max-w-7xl items-center gap-4">
           <div className="h-px flex-1 bg-border/60" />
           <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground/50">
-            Explore
+            {t.landing_explore}
           </span>
           <div className="h-px flex-1 bg-border/60" />
         </div>

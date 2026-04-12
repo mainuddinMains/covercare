@@ -9,13 +9,8 @@ import StepIndicator from './StepIndicator'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, ArrowLeft, DollarSign } from 'lucide-react'
-
-const STEPS = [
-  { label: 'Category' },
-  { label: 'Procedure' },
-  { label: 'Insurance' },
-  { label: 'Result' },
-]
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 const CATEGORIES = [
   ...new Set(Object.values(PROCEDURES).map((p) => p.category)),
@@ -27,6 +22,16 @@ const INSURANCE_OPTIONS = Object.entries(INSURANCE_LABELS) as [
 ][]
 
 export default function CostEstimator() {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
+  const STEPS = [
+    { label: t.cost_step_category },
+    { label: t.cost_step_procedure },
+    { label: t.cost_step_insurance },
+    { label: t.cost_step_result },
+  ]
+
   const [step, setStep] = useState(0)
   const [category, setCategory] = useState('')
   const [procedureKey, setProcedureKey] = useState('')
@@ -53,7 +58,7 @@ export default function CostEstimator() {
       setResult(data)
       setStep(3)
     } catch {
-      setError('Could not fetch cost estimate. Please try again.')
+      setError(t.cost_error)
     } finally {
       setLoading(false)
     }
@@ -71,9 +76,9 @@ export default function CostEstimator() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-heading text-xl font-semibold">Estimate Your Out-of-Pocket Cost</h1>
+        <h1 className="font-heading text-xl font-semibold">{t.cost_heading}</h1>
         <p className="text-sm text-muted-foreground">
-          Based on real CMS Medicare Fee Schedule rates.
+          {t.cost_subtitle}
         </p>
       </div>
 
@@ -82,7 +87,7 @@ export default function CostEstimator() {
       {step > 0 && step < 3 && (
         <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>
           <ArrowLeft size={14} className="mr-1" />
-          Back
+          {t.cost_back}
         </Button>
       )}
 
@@ -141,7 +146,7 @@ export default function CostEstimator() {
             <div className="flex items-center justify-center py-6">
               <Loader2 className="animate-spin text-muted-foreground" size={20} />
               <span className="ml-2 text-sm text-muted-foreground">
-                Looking up CMS rates...
+                {t.cost_loading}
               </span>
             </div>
           )}
@@ -167,7 +172,7 @@ export default function CostEstimator() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-muted p-3">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
-                    Your estimated cost
+                    {t.cost_your_estimated}
                   </p>
                   <p className="text-lg font-bold text-primary">
                     ${result.outOfPocketLow} - ${result.outOfPocketHigh}
@@ -175,7 +180,7 @@ export default function CostEstimator() {
                 </div>
                 <div className="rounded-lg bg-muted p-3">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
-                    Total billed
+                    {t.cost_total_billed}
                   </p>
                   <p className="text-lg font-bold">
                     ${result.totalEstimatedCost?.toLocaleString()}
@@ -185,22 +190,21 @@ export default function CostEstimator() {
             ) : (
               <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
                 <p className="text-sm font-medium text-muted-foreground">
-                  Cost data not available
+                  {t.cost_not_available}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  CMS does not publish a rate for this procedure.
-                  Contact your insurer directly for a cost estimate.
+                  {t.cost_not_available_detail}
                 </p>
               </div>
             )}
 
             <p className="text-xs text-muted-foreground">{result.note}</p>
             <p className="text-[10px] text-muted-foreground">
-              Source: {result.source}
+              {t.cost_source} {result.source}
             </p>
 
             <Button onClick={reset} variant="outline" className="w-full">
-              Estimate another procedure
+              {t.cost_estimate_another}
             </Button>
           </CardContent>
         </Card>

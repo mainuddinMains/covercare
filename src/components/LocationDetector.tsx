@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input'
 import { reverseGeocode } from '@/lib/geocoding'
 import type { DetectedLocation } from '@/lib/types'
 import { MapPin, Loader2 } from 'lucide-react'
+import { usePreferencesStore } from '@/store/appStore'
+import { translations } from '@/lib/i18n'
 
 interface Props {
   onDetect: (location: DetectedLocation) => void
@@ -11,6 +13,9 @@ interface Props {
 }
 
 export default function LocationDetector({ onDetect, className = '' }: Props) {
+  const locale = usePreferencesStore((s) => s.locale)
+  const t = translations[locale]
+
   const [loading, setLoading] = useState(false)
   const [manualZip, setManualZip] = useState('')
   const [error, setError] = useState('')
@@ -20,7 +25,7 @@ export default function LocationDetector({ onDetect, className = '' }: Props) {
     setError('')
 
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.')
+      setError(t.location_error_geolocation)
       setLoading(false)
       return
     }
@@ -34,13 +39,13 @@ export default function LocationDetector({ onDetect, className = '' }: Props) {
           )
           onDetect(loc)
         } catch {
-          setError('Could not determine your location. Enter a ZIP code instead.')
+          setError(t.location_error_determine)
         } finally {
           setLoading(false)
         }
       },
       () => {
-        setError('Location permission denied. Enter a ZIP code instead.')
+        setError(t.location_error_permission)
         setLoading(false)
       },
     )
@@ -72,12 +77,12 @@ export default function LocationDetector({ onDetect, className = '' }: Props) {
         ) : (
           <MapPin size={16} className="mr-2" />
         )}
-        {loading ? 'Locating...' : 'Use My Location'}
+        {loading ? t.location_locating : t.location_use_my_location}
       </Button>
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="h-px flex-1 bg-border" />
-        or
+        {t.location_or}
         <span className="h-px flex-1 bg-border" />
       </div>
 
@@ -85,12 +90,12 @@ export default function LocationDetector({ onDetect, className = '' }: Props) {
         <Input
           value={manualZip}
           onChange={(e) => setManualZip(e.target.value.replace(/\D/g, '').slice(0, 5))}
-          placeholder="Enter ZIP code"
+          placeholder={t.location_zip_placeholder}
           inputMode="numeric"
           maxLength={5}
         />
         <Button type="submit" disabled={manualZip.length !== 5}>
-          Go
+          {t.location_go}
         </Button>
       </form>
 

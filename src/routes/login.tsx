@@ -167,7 +167,7 @@ function LoginPage() {
                 <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-card px-3 text-muted-foreground">or</span>
+                <span className="bg-card px-3 text-muted-foreground">{t.auth_or}</span>
               </div>
             </div>
 
