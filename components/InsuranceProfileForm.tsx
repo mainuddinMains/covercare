@@ -8,6 +8,57 @@ import { ScannedCard } from "@/lib/card-scanner";
 import LocationDetector from "./LocationDetector";
 import InsuranceCardScanner from "./InsuranceCardScanner";
 
+const PROFILE_SECTIONS = [
+  { label: "Insurance type", key: "insuranceType" as const },
+  { label: "Plan details",   key: "planName"       as const },
+  { label: "Location",       key: "zip"            as const },
+  { label: "Effective date", key: "effectiveDate"  as const },
+];
+
+function ProfileProgress({ profile }: { profile: ReturnType<typeof useInsuranceProfile>["profile"] }) {
+  const done = PROFILE_SECTIONS.filter((s) => Boolean(profile[s.key])).length;
+  const pct  = Math.round((done / PROFILE_SECTIONS.length) * 100);
+
+  return (
+    <div className="mb-6 bg-gray-50 border border-gray-100 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-gray-600">Profile completion</span>
+        <span className="text-xs font-bold text-blue-600">{pct}%</span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Profile ${pct}% complete`}
+        className="h-2 bg-gray-200 rounded-full overflow-hidden mb-3"
+      >
+        <div
+          className="h-full bg-blue-500 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        {PROFILE_SECTIONS.map((s) => {
+          const filled = Boolean(profile[s.key]);
+          return (
+            <span
+              key={s.key}
+              className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                filled
+                  ? "bg-green-50 border-green-200 text-green-700"
+                  : "bg-white border-gray-200 text-gray-400"
+              }`}
+            >
+              {filled ? "✓" : "○"} {s.label}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function InsuranceProfileForm() {
   const {
     profile, updateField, applyScannedCard, clearProfile,
@@ -52,6 +103,9 @@ export default function InsuranceProfileForm() {
           gives the AI assistant your coverage context.
         </p>
       </div>
+
+      {/* Profile progress */}
+      <ProfileProgress profile={profile} />
 
       {/* Card Scanner */}
       <div className="mb-6">

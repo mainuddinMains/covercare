@@ -25,6 +25,7 @@ export default function ChatInput({ onSend, disabled }: Props) {
     t.suggestion_dental,
     t.suggestion_medicaid,
     t.suggestion_cardiologist(stateHint),
+    "What should I bring to my first doctor visit?",
   ];
 
   function submit() {

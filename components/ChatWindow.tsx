@@ -10,7 +10,7 @@ import ChatInput from "./ChatInput";
 
 export default function ChatWindow() {
   const { profile, hasProfile, hasLocation, locationDisplay } = useInsuranceProfile();
-  const { t } = useLanguage();
+  const { t, simpleMode, toggleSimpleMode } = useLanguage();
 
   const WELCOME: Message = {
     role: "assistant",
@@ -21,7 +21,6 @@ export default function ChatWindow() {
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Build a natural-language summary of the saved profile to inject into the system prompt
   function buildProfileContext(): string | undefined {
     if (!hasProfile && !hasLocation) return undefined;
     const parts: string[] = [];
@@ -44,24 +43,25 @@ export default function ChatWindow() {
   async function sendMessage(text: string) {
     if (!text.trim() || streaming) return;
 
-    // Add user message — history now includes everything prior
     const userMsg: Message = { role: "user", content: text };
     const history = [...messages, userMsg];
     setMessages(history);
     setStreaming(true);
-
-    // Placeholder for the streaming assistant response
-    const assistantPlaceholder: Message = { role: "assistant", content: "" };
-    setMessages([...history, assistantPlaceholder]);
+    setMessages([...history, { role: "assistant", content: "" }]);
 
     try {
-      // Send FULL history (minus the welcome message which is UI-only)
-      const payload = history.filter((m) => m.role !== "assistant" || m.content !== WELCOME.content);
+      const payload = history.filter(
+        (m) => m.role !== "assistant" || m.content !== WELCOME.content
+      );
 
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: payload, profileContext: buildProfileContext() }),
+        body: JSON.stringify({
+          messages: payload,
+          profileContext: buildProfileContext(),
+          simpleMode,
+        }),
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -73,9 +73,7 @@ export default function ChatWindow() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
-        // Parse SSE lines
         for (const line of chunk.split("\n")) {
           if (!line.startsWith("data: ")) continue;
           const data = line.slice(6).trim();
@@ -84,21 +82,13 @@ export default function ChatWindow() {
             const json = JSON.parse(data);
             const delta = json.choices?.[0]?.delta?.content ?? "";
             fullText += delta;
-            setMessages([
-              ...history,
-              { role: "assistant", content: fullText },
-            ]);
-          } catch {
-            // skip malformed chunks
-          }
+            setMessages([...history, { role: "assistant", content: fullText }]);
+          } catch { /* skip malformed chunks */ }
         }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
-      setMessages([
-        ...history,
-        { role: "assistant", content: `Sorry, I ran into an error: ${msg}` },
-      ]);
+      setMessages([...history, { role: "assistant", content: `Sorry, I ran into an error: ${msg}` }]);
     } finally {
       setStreaming(false);
     }
@@ -110,24 +100,58 @@ export default function ChatWindow() {
 
   return (
     <div className="flex flex-col flex-1 max-w-2xl mx-auto w-full">
-      {/* Chat toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-white">
-        {hasProfile ? (
-          <a href="/profile" className="text-xs text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-full hover:bg-green-100 transition-colors">
-            {profile.insuranceType ? `${INSURANCE_LABELS[profile.insuranceType]} · ${t.chat_profile_active}` : t.chat_profile_active}
-          </a>
-        ) : (
-          <a href="/profile" className="text-xs text-gray-400 hover:text-blue-600 transition-colors">
-            {t.chat_save_profile}
-          </a>
-        )}
-        <button
-          onClick={clearHistory}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          {t.chat_new_convo}
-        </button>
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-white gap-2 flex-wrap">
+        {/* Left: profile chip */}
+        <div className="flex items-center gap-2">
+          {hasProfile ? (
+            <a href="/profile" className="text-xs text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-full hover:bg-green-100 transition-colors">
+              {profile.insuranceType
+                ? `${INSURANCE_LABELS[profile.insuranceType]} · ${t.chat_profile_active}`
+                : t.chat_profile_active}
+            </a>
+          ) : (
+            <a href="/profile" className="text-xs text-gray-400 hover:text-blue-600 transition-colors">
+              {t.chat_save_profile}
+            </a>
+          )}
+        </div>
+
+        {/* Right: Simple mode toggle + New conversation */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSimpleMode}
+            title={simpleMode ? "Switch to standard language" : "Switch to Simple English"}
+            className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+              simpleMode
+                ? "bg-purple-600 text-white border-purple-600 font-medium"
+                : "border-gray-200 text-gray-500 hover:border-purple-300 hover:text-purple-600"
+            }`}
+          >
+            <span aria-hidden>📖</span>
+            {simpleMode ? "Simple English" : "Simple English"}
+          </button>
+
+          <button
+            onClick={clearHistory}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {t.chat_new_convo}
+          </button>
+        </div>
       </div>
+
+      {/* Simple mode banner */}
+      {simpleMode && (
+        <div className="px-4 py-1.5 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
+          <span className="text-[11px] text-purple-700">
+            Simple English mode is on — responses use plain language and avoid jargon.
+          </span>
+          <button onClick={toggleSimpleMode} className="ml-auto text-[11px] text-purple-400 hover:text-purple-700">
+            Turn off
+          </button>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gray-50">

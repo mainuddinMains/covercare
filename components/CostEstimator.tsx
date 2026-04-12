@@ -3,24 +3,63 @@
 import { useState } from "react";
 import { PROCEDURES, INSURANCE_LABELS, InsuranceType, CostEstimate } from "@/lib/cost-estimator";
 import { useInsuranceProfile } from "@/hooks/useInsuranceProfile";
+import StepIndicator from "./StepIndicator";
+
+// ── Category config ───────────────────────────────────────────────────────────
+
+const CATEGORY_META: Record<string, { icon: string; description: string }> = {
+  "Primary Care": { icon: "🏥", description: "Regular check-ups and sick visits" },
+  "Emergency":    { icon: "🚨", description: "ER and urgent care visits" },
+  "Imaging":      { icon: "🔬", description: "X-rays, MRIs, CT scans, ultrasounds" },
+  "Lab":          { icon: "🧪", description: "Blood tests and urine tests" },
+  "Cardiology":   { icon: "❤️", description: "Heart tests and monitoring" },
+  "GI":           { icon: "🫁", description: "Stomach and digestive care" },
+  "Preventive":   { icon: "🛡️", description: "Screenings and vaccines" },
+  "Surgery":      { icon: "✂️", description: "Planned operations" },
+  "OB/GYN":       { icon: "👶", description: "Pregnancy and women's health" },
+  "Therapy":      { icon: "🦾", description: "Physical and rehab therapy" },
+};
 
 const CATEGORIES = Array.from(new Set(Object.values(PROCEDURES).map((p) => p.category)));
 
+const STEPS = [
+  { label: "Service type" },
+  { label: "Procedure" },
+  { label: "Insurance" },
+  { label: "Your estimate" },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function CostEstimator() {
   const { profile } = useInsuranceProfile();
+
+  const [step, setStep]         = useState(0);
+  const [category, setCategory] = useState("");
   const [procedure, setProcedure] = useState("");
-  // Pre-populate from saved profile; falls back to empty
   const [insurance, setInsurance] = useState<InsuranceType | "">(profile.insuranceType);
-  const [estimate, setEstimate] = useState<CostEstimate | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [category, setCategory] = useState("All");
+  const [estimate, setEstimate]   = useState<CostEstimate | null>(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
 
   const filteredProcedures = Object.entries(PROCEDURES).filter(
-    ([, p]) => category === "All" || p.category === category
+    ([, p]) => p.category === category
   );
 
-  async function handleEstimate() {
+  // ── Navigation ──────────────────────────────────────────────────────────────
+
+  function pickCategory(cat: string) {
+    setCategory(cat);
+    setProcedure("");
+    setStep(1);
+  }
+
+  function pickProcedure(key: string) {
+    setProcedure(key);
+    setStep(2);
+  }
+
+  async function getEstimate() {
     if (!procedure || !insurance) return;
     setLoading(true);
     setError("");
@@ -31,6 +70,7 @@ export default function CostEstimator() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to estimate cost");
       setEstimate(data.estimate);
+      setStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -38,155 +78,221 @@ export default function CostEstimator() {
     }
   }
 
+  function restart() {
+    setStep(0); setCategory(""); setProcedure("");
+    setInsurance(profile.insuranceType); setEstimate(null); setError("");
+  }
+
   function fmt(n: number) {
     return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
   }
 
-  const metalColors: Record<string, string> = {
-    "aca-bronze": "text-orange-700 bg-orange-50",
-    "aca-silver": "text-gray-600 bg-gray-100",
-    "aca-gold":   "text-yellow-700 bg-yellow-50",
-  };
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-1">Estimate Your Out-of-Pocket Cost</h2>
+      {/* Header */}
+      <div className="mb-5">
+        <h1 className="text-xl font-semibold text-gray-900 mb-1">Estimate Your Out-of-Pocket Cost</h1>
         <p className="text-sm text-gray-500">
-          Based on real CMS Medicare Fee Schedule rates + typical insurance cost-sharing.
+          Real costs from the CMS Medicare rate database. Takes about 30 seconds.
         </p>
       </div>
 
-      {profile.insuranceType && (
-        <div className="mb-4 flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-          <span>Pre-filled from your saved profile: <strong>{INSURANCE_LABELS[profile.insuranceType]}</strong></span>
-          <a href="/profile" className="ml-auto text-blue-600 hover:underline whitespace-nowrap">Edit profile</a>
-        </div>
+      {/* Step progress */}
+      <StepIndicator steps={STEPS} current={step} className="mb-6" />
+
+      {/* ── Step 0: Category ───────────────────────────────────────────────── */}
+      {step === 0 && (
+        <section aria-labelledby="step-category-heading">
+          <h2 id="step-category-heading" className="text-sm font-semibold text-gray-700 mb-3">
+            What type of service do you need?
+          </h2>
+          <div className="grid grid-cols-2 gap-2" role="list">
+            {CATEGORIES.map((cat) => {
+              const meta = CATEGORY_META[cat] ?? { icon: "🏥", description: "" };
+              return (
+                <button
+                  key={cat}
+                  onClick={() => pickCategory(cat)}
+                  aria-label={`${cat}: ${meta.description}`}
+                  role="listitem"
+                  className="flex items-start gap-3 bg-white border border-gray-100 hover:border-blue-300 hover:shadow-sm rounded-xl p-3 text-left transition-all group"
+                >
+                  <span className="text-2xl flex-shrink-0 mt-0.5" aria-hidden>{meta.icon}</span>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 group-hover:text-blue-700">{cat}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 leading-snug">{meta.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
       )}
 
-      {/* Category filter */}
-      <div className="flex gap-2 flex-wrap mb-3">
-        {["All", ...CATEGORIES].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => { setCategory(cat); setProcedure(""); }}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-              category === cat
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {/* ── Step 1: Procedure ──────────────────────────────────────────────── */}
+      {step === 1 && (
+        <section aria-labelledby="step-procedure-heading">
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => setStep(0)}
+              aria-label="Back to service type"
+              className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+            >
+              ← Back
+            </button>
+            <span className="text-xs text-gray-300">|</span>
+            <span className="text-xs text-blue-600 font-medium">
+              {CATEGORY_META[category]?.icon} {category}
+            </span>
+          </div>
 
-      <div className="space-y-3 mb-4">
-        {/* Procedure */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Procedure</label>
-          <select
-            value={procedure}
-            onChange={(e) => setProcedure(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select a procedure...</option>
-            {filteredProcedures.map(([key, p]) => (
-              <option key={key} value={key}>
-                {p.name} (CPT {p.cpt})
-              </option>
+          <h2 id="step-procedure-heading" className="text-sm font-semibold text-gray-700 mb-3">
+            Which procedure?
+          </h2>
+          <div className="space-y-1.5" role="list">
+            {filteredProcedures.map(([key, proc]) => (
+              <button
+                key={key}
+                onClick={() => pickProcedure(key)}
+                aria-label={`${proc.name}, CPT code ${proc.cpt}`}
+                role="listitem"
+                className="w-full flex items-center justify-between bg-white border border-gray-100 hover:border-blue-300 hover:shadow-sm rounded-xl px-4 py-3 text-left transition-all group"
+              >
+                <span className="text-sm text-gray-800 group-hover:text-blue-700">{proc.name}</span>
+                <span className="text-xs text-gray-400 flex-shrink-0 ml-2">CPT {proc.cpt}</span>
+              </button>
             ))}
-          </select>
-        </div>
+          </div>
+        </section>
+      )}
 
-        {/* Insurance */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Your Insurance</label>
+      {/* ── Step 2: Insurance ──────────────────────────────────────────────── */}
+      {step === 2 && (
+        <section aria-labelledby="step-insurance-heading">
+          <div className="flex items-center gap-2 mb-3">
+            <button onClick={() => setStep(1)} aria-label="Back to procedure" className="text-xs text-gray-400 hover:text-gray-700">
+              ← Back
+            </button>
+            <span className="text-xs text-gray-300">|</span>
+            <span className="text-xs text-blue-600 font-medium truncate">
+              {PROCEDURES[procedure]?.name}
+            </span>
+          </div>
+
+          <h2 id="step-insurance-heading" className="text-sm font-semibold text-gray-700 mb-3">
+            What insurance do you have?
+          </h2>
+
+          {profile.insuranceType && (
+            <div className="mb-3 flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+              <span>Pre-filled from your profile: <strong>{INSURANCE_LABELS[profile.insuranceType]}</strong></span>
+              <a href="/profile" className="ml-auto text-blue-600 hover:underline whitespace-nowrap">Change</a>
+            </div>
+          )}
+
           <select
+            id="insurance-select"
             value={insurance}
             onChange={(e) => setInsurance(e.target.value as InsuranceType)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Select your insurance type"
+            className="w-full text-sm border border-gray-200 rounded-xl px-3 py-3 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
           >
-            <option value="">Select your insurance...</option>
-            {(Object.entries(INSURANCE_LABELS) as [InsuranceType, string][]).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
+            <option value="">Select your insurance…</option>
+            {(Object.entries(INSURANCE_LABELS) as [InsuranceType, string][]).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
             ))}
           </select>
-        </div>
 
-        <button
-          onClick={handleEstimate}
-          disabled={!procedure || !insurance || loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium text-sm py-2.5 rounded-lg transition-colors"
-        >
-          {loading ? "Looking up CMS rates..." : "Estimate Cost"}
-        </button>
-      </div>
+          {error && (
+            <p role="alert" className="text-xs text-red-600 bg-red-50 rounded px-3 py-2 mb-3">{error}</p>
+          )}
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
+          <button
+            onClick={getEstimate}
+            disabled={!insurance || loading}
+            aria-busy={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium text-sm py-3 rounded-xl transition-colors"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden />
+                Looking up CMS rates…
+              </span>
+            ) : "Get My Estimate →"}
+          </button>
+        </section>
       )}
 
-      {/* Result card */}
-      {estimate && (
-        <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-          {/* Header */}
-          <div className="bg-blue-600 px-5 py-4 text-white">
-            <h3 className="font-semibold text-base">{estimate.procedure}</h3>
-            <p className="text-blue-100 text-xs mt-0.5">CPT {estimate.cpt} · {estimate.insuranceLabel}</p>
-          </div>
+      {/* ── Step 3: Results ────────────────────────────────────────────────── */}
+      {step === 3 && estimate && (
+        <section aria-labelledby="step-result-heading" aria-live="polite">
+          <h2 id="step-result-heading" className="sr-only">Your cost estimate</h2>
 
-          {/* Cost breakdown */}
-          <div className="px-5 py-4">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <p className="text-xs text-gray-500 mb-1">Medicare Rate</p>
-                <p className="text-xl font-bold text-gray-800">{fmt(estimate.medicareRate)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">gov't benchmark</p>
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            {/* Header bar */}
+            <div className="bg-blue-600 px-5 py-4 text-white">
+              <h3 className="font-semibold text-base">{estimate.procedure}</h3>
+              <p className="text-blue-100 text-xs mt-0.5">CPT {estimate.cpt} · {estimate.insuranceLabel}</p>
+            </div>
+
+            <div className="px-5 py-4">
+              {/* Rate grid */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">Medicare Rate</p>
+                  <p className="text-xl font-bold text-gray-800">{fmt(estimate.medicareRate)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">gov't benchmark</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">Est. Total Bill</p>
+                  <p className="text-xl font-bold text-gray-800">{fmt(estimate.totalEstimatedCost)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">before insurance</p>
+                </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <p className="text-xs text-gray-500 mb-1">Est. Total Billed</p>
-                <p className="text-xl font-bold text-gray-800">{fmt(estimate.totalEstimatedCost)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">before insurance</p>
+
+              {/* Out-of-pocket highlight */}
+              <div className="rounded-2xl bg-blue-50 p-4 text-center mb-4">
+                <p className="text-xs text-gray-500 mb-1">Your Estimated Out-of-Pocket</p>
+                {estimate.insurance === "medicaid" ? (
+                  <p className="text-3xl font-bold text-green-600">$0 – $5</p>
+                ) : estimate.outOfPocketLow === estimate.outOfPocketHigh ? (
+                  <p className="text-3xl font-bold text-blue-700">{fmt(estimate.outOfPocketLow)}</p>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-700">
+                    {fmt(estimate.outOfPocketLow)}
+                    <span className="text-lg text-blue-400 mx-1">–</span>
+                    {fmt(estimate.outOfPocketHigh)}
+                  </p>
+                )}
+                {estimate.outOfPocketLow !== estimate.outOfPocketHigh && estimate.insurance !== "medicaid" && (
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Low = if you already met your deductible this year · High = if you haven't yet
+                  </p>
+                )}
               </div>
-            </div>
 
-            {/* Out-of-pocket highlight */}
-            <div className={`rounded-xl p-4 text-center mb-4 ${
-              insurance === "medicaid" ? "bg-green-50" : "bg-blue-50"
-            }`}>
-              <p className="text-xs text-gray-500 mb-1">Your Estimated Out-of-Pocket</p>
-              {estimate.outOfPocketLow === estimate.outOfPocketHigh ||
-               estimate.insurance === "medicaid" ? (
-                <p className="text-3xl font-bold text-blue-700">
-                  {estimate.insurance === "medicaid" ? "$0 – $5" : fmt(estimate.outOfPocketLow)}
-                </p>
-              ) : (
-                <p className="text-3xl font-bold text-blue-700">
-                  {fmt(estimate.outOfPocketLow)}
-                  <span className="text-lg text-blue-400 mx-1">–</span>
-                  {fmt(estimate.outOfPocketHigh)}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                {estimate.outOfPocketLow !== estimate.outOfPocketHigh
-                  ? "Low = deductible already met · High = deductible not yet met"
-                  : ""}
-              </p>
-            </div>
+              <div className="text-xs text-gray-500 space-y-1 mb-4">
+                <p><span className="font-medium text-gray-700">Plan details:</span> {estimate.note}</p>
+                <p><span className="font-medium text-gray-700">Source:</span> {estimate.source}</p>
+              </div>
 
-            <div className="text-xs text-gray-500 space-y-1">
-              <p><span className="font-medium text-gray-700">Plan details:</span> {estimate.note}</p>
-              <p><span className="font-medium text-gray-700">Data source:</span> {estimate.source}</p>
-            </div>
+              <div className="text-xs text-amber-700 bg-amber-50 rounded-xl px-3 py-2 mb-4">
+                These are estimates for planning only. Actual costs depend on your plan and the facility.
+                Always check with your insurer.
+              </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-              Estimates are for planning purposes only. Actual costs depend on your specific plan, network status, and facility pricing. Always verify with your insurer.
+              <button
+                onClick={restart}
+                aria-label="Estimate another procedure"
+                className="w-full border border-gray-200 text-gray-600 text-sm py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                ← Estimate another procedure
+              </button>
             </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
