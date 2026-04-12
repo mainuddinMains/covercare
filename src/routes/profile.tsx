@@ -20,7 +20,7 @@ function ProfilePage() {
 
   async function handleLogout() {
     await signOut()
-    navigate({ to: '/login' })
+    navigate({ to: '/' })
   }
 
   async function handleGuestExit() {

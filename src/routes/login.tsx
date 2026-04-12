@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Compass, ArrowRight, Loader2 } from 'lucide-react'
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { Compass, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -54,6 +54,14 @@ function LoginPage() {
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-[420px]">
+        <Link
+          to="/"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft size={14} />
+          {t.auth_back_to_home}
+        </Link>
+
         {/* Branding */}
         <div className="mb-10 text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">

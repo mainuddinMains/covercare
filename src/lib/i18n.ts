@@ -132,6 +132,7 @@ export const translations = {
     auth_error_generic: 'Something went wrong. Please try again.',
     auth_or: 'or',
     auth_logout: 'Log Out',
+    auth_back_to_home: 'Back to home',
 
     guest_profile_heading: 'You are browsing as a guest',
     guest_profile_body:
@@ -428,6 +429,7 @@ export const translations = {
     auth_error_generic: 'Algo sali\u00f3 mal. Int\u00e9ntalo de nuevo.',
     auth_or: 'o',
     auth_logout: 'Cerrar Sesi\u00f3n',
+    auth_back_to_home: 'Volver al inicio',
 
     guest_profile_heading: 'Estas navegando como invitado',
     guest_profile_body:
