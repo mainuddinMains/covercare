@@ -12,12 +12,12 @@ interface SamhsaFacility {
   latitude?: string | number
   longitude?: string | number
   services?: Array<{ name?: string }>
-  typeFacility?: string[]
   paymentAccepted?: string[]
 }
 
 interface SamhsaResponse {
-  facilities?: SamhsaFacility[]
+  rows?: SamhsaFacility[]
+  recordCount?: number
 }
 
 export async function findTreatmentFacilities(
@@ -35,13 +35,13 @@ export async function findTreatmentFacilities(
   })
 
   const res = await fetch(
-    `https://findtreatment.samhsa.gov/locator/listing?${params}`,
+    `https://findtreatment.gov/locator/api/v2/facilities?${params}`,
   )
 
   if (!res.ok) throw new Error(`SAMHSA API error: ${res.status}`)
 
   const data: SamhsaResponse = await res.json()
-  const facilities = data?.facilities ?? []
+  const facilities = data?.rows ?? []
 
   return facilities.map((f) => {
     const payment = f.paymentAccepted ?? []

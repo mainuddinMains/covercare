@@ -91,7 +91,7 @@ export interface HospitalPrice {
   discharges: number
 }
 
-// GoodRx Drug Pricing
+// FDA Drug Info
 export interface DrugPrice {
   drugName: string
   genericName?: string
