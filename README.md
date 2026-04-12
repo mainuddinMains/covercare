@@ -1,64 +1,36 @@
-# CoverCare 🏥
-
-> AI-powered US healthcare navigator for immigrants, international students, and underserved Americans.
-
-Built for hackathon — helps users find the right insurance, locate in-network hospitals, and discover free community clinics near them.
-
-## Features
-
-- **Insurance Guide** — personalized coverage options by immigration/citizenship status
-- **Find Care** — AI-powered symptom guidance + in-network provider search (St. Louis)
-- **Community Clinics** — FQHC and free clinic locator, accepts all regardless of status
-- **Learn** — plain-language explainers on how US healthcare actually works
-
-## Tech Stack
-
-- React 18 + Vite
-- Anthropic Claude API (`claude-sonnet-4-20250514`) for AI guidance
-- No backend — runs entirely in the browser
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
+First, run the development server:
+
 ```bash
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## API Setup
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The app calls the Anthropic API directly from the frontend. For production, proxy requests through a backend to protect your API key.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```js
-// src/App.jsx — FindCare component
-const res = await fetch("https://api.anthropic.com/v1/messages", { ... })
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-For the hackathon demo, you can use Anthropic's [client-side API key](https://console.anthropic.com) with appropriate usage limits.
+## Learn More
 
-## Project Structure
+To learn more about Next.js, take a look at the following resources:
 
-```
-carecompass/
-├── index.html
-├── vite.config.js
-├── package.json
-└── src/
-    ├── main.jsx
-    └── App.jsx        # Full app — all components in one file
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## Screens
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-| Screen | Description |
-|--------|-------------|
-| Login / Signup | Entry point |
-| Status selector | Immigration/citizenship status for personalized guidance |
-| Insurance onboarding | 3-step plan setup (company, type, costs) |
-| Find Care | AI symptom triage + provider cards sorted by network |
-| Community Clinics | FQHCs and free clinics with filter |
-| Learn | Accordion cards explaining US healthcare |
-| Profile | Insurance summary + quick reference numbers |
+## Deploy on Vercel
 
-## Credits
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Built by Mainuddin — SLU MS Computer Science, HackSLU 2026
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
