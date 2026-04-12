@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CMSHospital } from '@/lib/cms-hospitals'
+import type { CMSHospital, HospitalSearchResult } from '@/lib/cms-hospitals'
 import { reverseGeocode } from '@/lib/geocoding'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +17,7 @@ import {
 
 export default function HospitalFinder() {
   const [hospitals, setHospitals] = useState<CMSHospital[]>([])
+  const [widened, setWidened] = useState(false)
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
   const [zip, setZip] = useState('')
@@ -31,8 +32,9 @@ export default function HospitalFinder() {
     try {
       const res = await fetch(`/api/hospitals?zip=${searchZip}`)
       if (!res.ok) throw new Error('Failed to fetch')
-      const data = (await res.json()) as CMSHospital[]
-      setHospitals(data)
+      const data = (await res.json()) as HospitalSearchResult
+      setHospitals(data.hospitals)
+      setWidened(data.widened)
     } catch {
       setError('Could not load hospitals. Please try again.')
     } finally {
@@ -129,7 +131,13 @@ export default function HospitalFinder() {
 
       {searched && !loading && hospitals.length === 0 && !error && (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          No hospitals found for this ZIP code.
+          No hospitals found in this area.
+        </p>
+      )}
+
+      {widened && hospitals.length > 0 && !loading && (
+        <p className="text-xs text-muted-foreground">
+          Showing hospitals in the wider {zip.slice(0, 3)}xx area.
         </p>
       )}
 

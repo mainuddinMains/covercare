@@ -15,8 +15,8 @@ export const Route = createFileRoute('/api/hospitals/')({
           )
         }
 
-        const hospitals = await searchHospitalsByZip(zip)
-        return new Response(JSON.stringify(hospitals), {
+        const result = await searchHospitalsByZip(zip)
+        return new Response(JSON.stringify(result), {
           headers: { 'Content-Type': 'application/json' },
         })
       },
