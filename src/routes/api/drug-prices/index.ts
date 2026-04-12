@@ -1,25 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getDrugPrices } from '@/lib/goodrx'
-import { getCfEnv } from '@/lib/env'
+import { searchDrug, getDrugAlternatives } from '@/lib/fda-drugs'
 
 export const Route = createFileRoute('/api/drug-prices/')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const cfEnv = getCfEnv()
-        const apiKey = cfEnv.GOODRX_API_KEY
-        const clientId = cfEnv.GOODRX_CLIENT_ID
-
-        if (!apiKey || !clientId) {
-          return new Response(
-            JSON.stringify({ error: 'GoodRx API not configured' }),
-            { status: 503, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
-
         const url = new URL(request.url)
         const drug = url.searchParams.get('drug') ?? ''
-        const quantity = parseInt(url.searchParams.get('quantity') ?? '30', 10)
+        const mode = url.searchParams.get('mode') ?? 'search'
 
         if (!drug) {
           return new Response(
@@ -29,8 +17,15 @@ export const Route = createFileRoute('/api/drug-prices/')({
         }
 
         try {
-          const prices = await getDrugPrices(drug, quantity, apiKey, clientId)
-          return new Response(JSON.stringify({ prices }), {
+          if (mode === 'alternatives') {
+            const alternatives = await getDrugAlternatives(drug)
+            return new Response(JSON.stringify({ alternatives }), {
+              headers: { 'Content-Type': 'application/json' },
+            })
+          }
+
+          const results = await searchDrug(drug)
+          return new Response(JSON.stringify({ results }), {
             headers: { 'Content-Type': 'application/json' },
           })
         } catch (err) {

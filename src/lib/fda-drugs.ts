@@ -1,5 +1,3 @@
-import type { DrugPrice } from './types'
-
 // FDA Drug Label & Product API - free, no key required
 // Docs: https://api.fda.gov/drug
 
@@ -70,10 +68,17 @@ export async function searchDrug(name: string, limit = 5): Promise<DrugInfo[]> {
   })
 }
 
+export interface DrugAlternative {
+  brandName: string
+  genericName: string
+  form: string
+  route: string
+}
+
 export async function getDrugAlternatives(
   genericName: string,
   limit = 10,
-): Promise<DrugPrice[]> {
+): Promise<DrugAlternative[]> {
   const encoded = encodeURIComponent(genericName)
   const url = `https://api.fda.gov/drug/ndc.json?search=generic_name:"${encoded}"&limit=${limit}`
 
@@ -85,12 +90,9 @@ export async function getDrugAlternatives(
   const results = data?.results ?? []
 
   return results.map((p) => ({
-    drugName: (p.brand_name ?? [])[0] ?? genericName,
-    genericName: (p.generic_name ?? [])[0],
-    dosage: '',
-    quantity: 0,
+    brandName: (p.brand_name ?? [])[0] ?? genericName,
+    genericName: (p.generic_name ?? [])[0] ?? '',
     form: (p.dosage_form ?? [])[0] ?? '',
-    pharmacy: 'See GoodRx or your pharmacy for pricing',
-    price: 0,
+    route: (p.route ?? [])[0] ?? '',
   }))
 }
