@@ -37,11 +37,11 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className="h-full bg-background font-sans text-foreground antialiased">
         {children}
         <Scripts />
       </body>
@@ -97,17 +97,17 @@ function RootLayout() {
   // While checking auth, show a spinner to avoid flash
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-[100dvh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-primary" />
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-[100dvh] flex-col overflow-hidden">
       <PreferencesProvider />
       <DisclaimerBanner />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-20 pt-4">
+      <main className="mx-auto w-full max-w-2xl min-h-0 flex-1 overflow-y-auto px-4 pb-20 pt-4">
         <Outlet />
       </main>
       <TabNav />

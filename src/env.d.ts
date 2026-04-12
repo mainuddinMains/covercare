@@ -5,6 +5,7 @@ interface CloudflareEnv {
   AUTH_SECRET: string
   AUTH_BASE_URL: string
   OPENROUTER_API_KEY: string
+  OPENROUTER_MODELS?: string
   GOOGLE_PLACES_API_KEY: string
   CMS_MARKETPLACE_API_KEY?: string
   GOODRX_CLIENT_ID?: string

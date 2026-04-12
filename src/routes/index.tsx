@@ -43,7 +43,7 @@ function LandingPage() {
   const t = translations[locale]
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       {/* Hero */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-16 text-center">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-lg shadow-primary/20">

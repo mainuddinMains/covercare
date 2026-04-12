@@ -8,13 +8,24 @@ import { CLIENT_TOOLS, TOOL_LABELS } from '@/lib/ai/tools'
 import { buildSystemPrompt } from '@/lib/ai/system-prompt'
 import { useInsuranceStore, usePreferencesStore } from '@/store/appStore'
 import { translations } from '@/lib/i18n'
-import { RotateCcw, Loader2 } from 'lucide-react'
+import { RotateCcw, Loader2, Compass } from 'lucide-react'
+import ToolResult from './chat/ToolResult'
+
+function AssistantAvatar() {
+  return (
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary">
+      <Compass size={14} className="text-primary-foreground" />
+    </div>
+  )
+}
 
 export default function ChatWindow() {
   const profile = useInsuranceStore((s) => s.profile)
   const { simpleMode, locale } = usePreferencesStore()
   const t = translations[locale]
+  const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const userScrolledUp = useRef(false)
 
   const systemPrompt = useMemo(
     () => buildSystemPrompt(profile, simpleMode),
@@ -31,10 +42,19 @@ export default function ChatWindow() {
   })
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!userScrolledUp.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
 
-  const showSuggestions = messages.length === 0
+  function handleScroll() {
+    const el = scrollRef.current
+    if (!el) return
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    userScrolledUp.current = distanceFromBottom > 80
+  }
+
+  const isEmpty = messages.length === 0
   const locationLabel = profile.city || profile.zip || ''
   const suggestions = [
     t.suggestion_clinics(locationLabel || 'near me'),
@@ -43,8 +63,11 @@ export default function ChatWindow() {
     t.suggestion_cardiologist(profile.stateCode || 'my state'),
   ]
 
+  // Show suggestions on empty state or after the last assistant message when not loading
+  const showSuggestions = isEmpty || (!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant')
+
   return (
-    <div className="flex h-[calc(100svh-8rem)] flex-col">
+    <div className="flex h-full flex-col">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="font-heading text-xl font-semibold">{t.nav_chat}</h1>
         {messages.length > 0 && (
@@ -55,50 +78,52 @@ export default function ChatWindow() {
         )}
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto pb-4">
-        {showSuggestions && (
-          <>
-            <div className="rounded-xl bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 space-y-4 overflow-y-auto pb-4">
+        {/* Welcome state */}
+        {isEmpty && (
+          <div className="flex gap-3">
+            <AssistantAvatar />
+            <div className="flex-1 rounded-2xl rounded-tl-md border border-border bg-card p-4">
+              <p className="text-sm leading-relaxed text-foreground">
                 {t.chat_welcome}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => sendMessage(s)}
-                  className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </>
+          </div>
         )}
 
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={
-              msg.role === 'user'
-                ? 'ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground'
-                : 'max-w-[85%] text-sm'
-            }
-          >
-            {msg.role === 'user' ? (
-              msg.parts
-                .filter((p) => p.type === 'text')
-                .map((p, i) => <span key={i}>{p.content}</span>)
-            ) : (
-              <div className="space-y-2">
+        {/* Messages */}
+        {messages.map((msg) => {
+          if (msg.role === 'user') {
+            return (
+              <div
+                key={msg.id}
+                className="ml-auto max-w-[80%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground"
+              >
+                {msg.parts
+                  .filter((p) => p.type === 'text')
+                  .map((p, i) => (
+                    <span key={i}>{p.content}</span>
+                  ))}
+              </div>
+            )
+          }
+
+          return (
+            <div key={msg.id} className="flex gap-3">
+              <AssistantAvatar />
+              <div className="min-w-0 flex-1 space-y-2">
                 {msg.parts.map((part, i) => {
                   if (part.type === 'text') {
                     return (
-                      <div key={i} className="prose prose-sm max-w-none text-foreground prose-strong:text-primary">
-                        <Markdown remarkPlugins={[remarkGfm]}>
-                          {part.content}
-                        </Markdown>
+                      <div
+                        key={i}
+                        className="rounded-2xl rounded-tl-md border border-border bg-card px-4 py-3 text-sm"
+                      >
+                        <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed prose-strong:text-primary prose-ul:my-1 prose-li:my-0">
+                          <Markdown remarkPlugins={[remarkGfm]}>
+                            {part.content}
+                          </Markdown>
+                        </div>
                       </div>
                     )
                   }
@@ -106,20 +131,26 @@ export default function ChatWindow() {
                     const isDone =
                       part.state === 'input-complete' &&
                       part.output !== undefined
-                    const label =
-                      TOOL_LABELS[part.name] ?? part.name
+                    const label = TOOL_LABELS[part.name] ?? part.name
+
+                    if (isDone) {
+                      const ui = (
+                        <ToolResult
+                          name={part.name}
+                          output={part.output}
+                        />
+                      )
+                      // If ToolResult renders something, show it. Otherwise skip silently.
+                      if (ui) return <div key={i}>{ui}</div>
+                      return null
+                    }
+
                     return (
                       <span
                         key={i}
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${
-                          isDone
-                            ? 'bg-muted text-muted-foreground'
-                            : 'animate-pulse bg-primary/10 text-primary'
-                        }`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
                       >
-                        {!isDone && (
-                          <Loader2 size={12} className="animate-spin" />
-                        )}
+                        <Loader2 size={10} className="animate-spin" />
                         {label}
                       </span>
                     )
@@ -127,17 +158,52 @@ export default function ChatWindow() {
                   return null
                 })}
               </div>
-            )}
+            </div>
+          )
+        })}
+
+        {/* Typing indicator */}
+        {isLoading &&
+          (messages.length === 0 ||
+            messages[messages.length - 1]?.role === 'user') && (
+            <div className="flex gap-3">
+              <AssistantAvatar />
+              <div className="rounded-2xl rounded-tl-md border border-border bg-card px-4 py-3">
+                <div className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40 [animation-delay:0ms]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40 [animation-delay:150ms]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40 [animation-delay:300ms]" />
+                </div>
+              </div>
+            </div>
+          )}
+
+        {/* Suggestion chips */}
+        {showSuggestions && (
+          <div className="flex flex-wrap gap-2 pl-10">
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => sendMessage(s)}
+                disabled={isLoading}
+                className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+              >
+                {s}
+              </button>
+            ))}
           </div>
-        ))}
+        )}
 
         <div ref={bottomRef} />
       </div>
 
-      <ChatInput
-        onSend={(text) => sendMessage(text)}
-        disabled={isLoading}
-      />
+      {/* Input area */}
+      <div className="rounded-xl border border-border bg-card p-2">
+        <ChatInput
+          onSend={(text) => sendMessage(text)}
+          disabled={isLoading}
+        />
+      </div>
     </div>
   )
 }

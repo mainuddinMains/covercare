@@ -28,7 +28,10 @@ export const Route = createFileRoute('/api/chat/')({
 
         const { messages, data } = body
         const systemPrompt = data?.context ?? ''
-        const adapter = createOpenRouterText('openai/gpt-4o-mini' as any, apiKey)
+        const model = env.OPENROUTER_MODELS
+          ? env.OPENROUTER_MODELS.split(',')[0].trim()
+          : 'openai/gpt-4o-mini'
+        const adapter = createOpenRouterText(model as any, apiKey)
 
         const stream = chat({
           adapter,
