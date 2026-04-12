@@ -4,6 +4,7 @@ import {
   Building2,
   Calculator,
   User,
+  Award,
 } from 'lucide-react'
 import { usePreferencesStore } from '@/store/appStore'
 import { translations } from '@/lib/i18n'
@@ -17,6 +18,7 @@ export default function TabNav() {
     { to: '/chat' as const, label: t.nav_chat, icon: MessageCircle },
     { to: '/hospitals' as const, label: t.nav_hospitals, icon: Building2 },
     { to: '/estimate' as const, label: t.nav_cost, icon: Calculator },
+    { to: '/plans' as const, label: t.nav_plans, icon: Award },
     { to: '/profile' as const, label: t.nav_profile, icon: User },
   ]
 
@@ -34,14 +36,14 @@ export default function TabNav() {
             <Link
               key={tab.to}
               to={tab.to}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] transition-colors ${
                 active
                   ? 'font-semibold text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+              <Icon size={19} strokeWidth={active ? 2.5 : 1.5} />
               <span>{tab.label}</span>
             </Link>
           )

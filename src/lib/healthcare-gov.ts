@@ -52,6 +52,7 @@ async function fetchFromCms(
   apiKey: string,
   householdSize: number,
   income: number,
+  age?: number,
 ): Promise<InsurancePlan[]> {
   const params = new URLSearchParams({
     zipcode: zip,
@@ -62,6 +63,7 @@ async function fetchFromCms(
     household_size: String(householdSize),
     household_income: String(income),
   })
+  if (age && age > 0) params.set('age', String(age))
 
   const res = await fetch(`${CMS_BASE}/plans/search?${params}`, {
     headers: { Accept: 'application/json', apikey: apiKey },
@@ -126,10 +128,11 @@ export async function findPlans(
   apiKey?: string,
   householdSize = 1,
   income = 0,
+  age?: number,
 ): Promise<InsurancePlan[]> {
   if (apiKey) {
     try {
-      return await fetchFromCms(zip, year, apiKey, householdSize, income)
+      return await fetchFromCms(zip, year, apiKey, householdSize, income, age)
     } catch {
       // fall through to free dataset
     }

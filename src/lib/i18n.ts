@@ -4,7 +4,8 @@ export const translations = {
   en: {
     nav_chat: 'Chat',
     nav_hospitals: 'Hospitals',
-    nav_cost: 'Cost Estimator',
+    nav_cost: 'Costs',
+    nav_plans: 'Best Plans',
     nav_reminders: 'Reminders',
     nav_profile: 'Profile',
     nav_sources: 'Sources',
@@ -299,7 +300,8 @@ export const translations = {
   es: {
     nav_chat: 'Chat',
     nav_hospitals: 'Hospitales',
-    nav_cost: 'Estimador de Costos',
+    nav_cost: 'Costos',
+    nav_plans: 'Mejores Planes',
     nav_reminders: 'Recordatorios',
     nav_profile: 'Perfil',
     nav_sources: 'Fuentes',

@@ -240,3 +240,32 @@ export function isSubsidyEligible(income: number, householdSize: number): boolea
   const pct = (income / fpl) * 100
   return pct >= 100 && pct < 400
 }
+
+// Estimate monthly premium tax credit (APTC) based on 2024 ACA rules.
+// Uses the benchmark silver plan premium to calculate the credit amount.
+// Returns 0 if not eligible.
+export function calcEstimatedSubsidy(
+  income: number,
+  householdSize: number,
+  benchmarkSilverPremium: number,
+): number {
+  if (income <= 0) return benchmarkSilverPremium
+  const fpl = 15650 + (householdSize - 1) * 5590
+  const fplPct = (income / fpl) * 100
+  if (fplPct >= 400) return 0
+
+  let capPct = 0
+  if (fplPct < 150) capPct = 0
+  else if (fplPct < 200) capPct = ((fplPct - 150) / 50) * 0.02
+  else if (fplPct < 250) capPct = 0.02 + ((fplPct - 200) / 50) * 0.02
+  else if (fplPct < 300) capPct = 0.04 + ((fplPct - 250) / 50) * 0.02
+  else capPct = 0.06 + ((fplPct - 300) / 100) * 0.025
+
+  const monthlyIncomeCap = (income * capPct) / 12
+  return Math.max(0, benchmarkSilverPremium - monthlyIncomeCap)
+}
+
+// Apply the subsidy credit to a plan premium (never below $0)
+export function applySubsidy(premium: number, credit: number): number {
+  return Math.max(0, premium - credit)
+}

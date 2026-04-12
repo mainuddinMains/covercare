@@ -24,10 +24,12 @@ export const Route = createFileRoute('/api/plans/recommend/')({
         }
 
         const limit = parseInt(url.searchParams.get('limit') ?? '3', 10)
+        const ageParam = url.searchParams.get('age')
+        const age = ageParam ? parseInt(ageParam, 10) : undefined
         const apiKey = getCfEnv().CMS_MARKETPLACE_API_KEY
 
         try {
-          const plans = await findPlans(zip, year, apiKey, householdSize, income)
+          const plans = await findPlans(zip, year, apiKey, householdSize, income, age)
           const recommendations = recommendPlans(plans, income, householdSize, limit)
           return new Response(JSON.stringify({ recommendations }), {
             headers: { 'Content-Type': 'application/json' },
