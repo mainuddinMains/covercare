@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CMSHospital, HospitalSearchResult } from '@/lib/cms-hospitals'
 import { reverseGeocode } from '@/lib/geocoding'
 import { Card, CardContent } from '@/components/ui/card'
@@ -39,8 +39,13 @@ export default function HospitalFinder() {
   const [locating, setLocating] = useState(false)
   const [zip, setZip] = useState('')
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationDisplay, setLocationDisplay] = useState('')
   const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    handleLocate()
+  }, [])
 
   async function searchByZip(
     searchZip: string,
@@ -119,6 +124,7 @@ export default function HospitalFinder() {
           const newCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           setCoords(newCoords)
           setZip(loc.zip)
+          setLocationDisplay(loc.display || `${loc.city}, ${loc.stateCode} ${loc.zip}`)
           setLocating(false)
           searchByZip(loc.zip, newCoords)
         } catch {
@@ -144,12 +150,13 @@ export default function HospitalFinder() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2 max-w-xs">
         <Input
           value={zip}
           onChange={(e) => {
             setZip(e.target.value.replace(/\D/g, '').slice(0, 5))
             setCoords(null)
+            setLocationDisplay('')
           }}
           placeholder="Enter ZIP code"
           inputMode="numeric"
@@ -162,23 +169,39 @@ export default function HospitalFinder() {
             <Search size={16} />
           )}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={locating || loading}
+          onClick={handleLocate}
+          title="Use My Location"
+        >
+          {locating ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <MapPin size={16} />
+          )}
+        </Button>
       </form>
 
-      <Button
-        variant="outline"
-        className="w-full"
-        disabled={locating || loading}
-        onClick={handleLocate}
-      >
-        {locating ? (
-          <Loader2 size={16} className="mr-2 animate-spin" />
-        ) : (
-          <MapPin size={16} className="mr-2" />
-        )}
-        {locating ? 'Detecting location...' : 'Use My Location'}
-      </Button>
 
-      {zip.length === 5 && <MiniMap zip={zip} coords={coords} />}
+      {zip.length === 5 && (
+        <MiniMap
+          zip={zip}
+          coords={coords}
+          showHospitals={hospitals.length > 0}
+          locationDisplay={locationDisplay}
+          onReset={() => {
+            setZip('')
+            setCoords(null)
+            setLocationDisplay('')
+            setHospitals([])
+            setDistances([])
+            setSearched(false)
+            setError('')
+          }}
+        />
+      )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
@@ -188,11 +211,6 @@ export default function HospitalFinder() {
         </p>
       )}
 
-      {widened && hospitals.length > 0 && !loading && (
-        <p className="text-xs text-muted-foreground">
-          Showing hospitals in the wider {zip.slice(0, 3)}xx area.
-        </p>
-      )}
 
       <div className="space-y-3">
         {hospitals.map((h, i) => {
