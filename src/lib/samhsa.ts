@@ -43,11 +43,12 @@ export async function findTreatmentFacilities(
   const data: SamhsaResponse = await res.json()
   const facilities = data?.facilities ?? []
 
-  return facilities.map((f, i) => {
+  return facilities.map((f) => {
     const payment = f.paymentAccepted ?? []
+    const name = f.name1 ?? 'Unknown Facility'
     return {
-      id: String(i),
-      name: f.name1 ?? 'Unknown Facility',
+      id: `${name}-${f.zip ?? ''}`.replace(/\s+/g, '-').toLowerCase(),
+      name,
       address: [f.street1, f.street2].filter(Boolean).join(', '),
       city: f.city ?? '',
       state: f.state ?? '',

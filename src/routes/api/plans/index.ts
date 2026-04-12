@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { findPlans } from '@/lib/healthcare-gov'
+import { getCfEnv } from '@/lib/env'
 
 export const Route = createFileRoute('/api/plans/')({
   server: {
@@ -19,7 +20,8 @@ export const Route = createFileRoute('/api/plans/')({
           )
         }
 
-        const plans = await findPlans(zip, year)
+        const cfEnv = getCfEnv()
+        const plans = await findPlans(zip, year, cfEnv.CMS_MARKETPLACE_API_KEY)
         return new Response(JSON.stringify(plans), {
           headers: { 'Content-Type': 'application/json' },
         })

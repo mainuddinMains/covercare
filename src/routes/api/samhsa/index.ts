@@ -1,27 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { findZocdocProviders } from '@/lib/zocdoc'
-import { getCfEnv } from '@/lib/env'
+import { findTreatmentFacilities } from '@/lib/samhsa'
 
-export const Route = createFileRoute('/api/zocdoc')({
+export const Route = createFileRoute('/api/samhsa/')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const cfEnv = getCfEnv()
-        const apiKey = cfEnv.ZOCDOC_API_KEY
-
-        if (!apiKey) {
-          return new Response(
-            JSON.stringify({ error: 'Zocdoc API not configured' }),
-            { status: 503, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
-
         const url = new URL(request.url)
         const lat = parseFloat(url.searchParams.get('lat') ?? '')
         const lng = parseFloat(url.searchParams.get('lng') ?? '')
-        const specialty = url.searchParams.get('specialty') ?? 'Primary Care'
-        const insurance = url.searchParams.get('insurance') ?? ''
-        const limit = parseInt(url.searchParams.get('limit') ?? '15', 10)
+        const radius = parseInt(url.searchParams.get('radius') ?? '25', 10)
 
         if (isNaN(lat) || isNaN(lng)) {
           return new Response(
@@ -31,15 +18,8 @@ export const Route = createFileRoute('/api/zocdoc')({
         }
 
         try {
-          const providers = await findZocdocProviders(
-            lat,
-            lng,
-            specialty,
-            insurance,
-            apiKey,
-            limit,
-          )
-          return new Response(JSON.stringify({ providers }), {
+          const facilities = await findTreatmentFacilities(lat, lng, radius)
+          return new Response(JSON.stringify({ facilities }), {
             headers: { 'Content-Type': 'application/json' },
           })
         } catch (err) {

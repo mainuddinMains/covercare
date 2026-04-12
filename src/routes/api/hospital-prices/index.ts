@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { lookupHospitalPrices } from '@/lib/cms-hospital-prices'
 
-export const Route = createFileRoute('/api/hospital-prices')({
+export const Route = createFileRoute('/api/hospital-prices/')({
   server: {
     handlers: {
       GET: async ({ request }) => {

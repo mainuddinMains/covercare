@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback, useRef, useEffect } from "react";
 
 export function useSpeech() {
@@ -19,7 +17,7 @@ export function useSpeech() {
     // Strip markdown-ish characters that would be read aloud awkwardly
     const clean = text
       .replace(/[*_~`#>]+/g, "")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [text](url) → text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [text](url) -> text
       .trim();
 
     const utterance = new SpeechSynthesisUtterance(clean);

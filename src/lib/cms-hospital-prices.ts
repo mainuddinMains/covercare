@@ -14,23 +14,26 @@ interface CmsRow {
   average_medicare_payments?: string
 }
 
+function escapeSoql(value: string): string {
+  return value.replace(/'/g, "''")
+}
+
 export async function lookupHospitalPrices(
   drgKeyword: string,
   state?: string,
   limit = 20,
 ): Promise<HospitalPrice[]> {
+  const keyword = escapeSoql(drgKeyword.toUpperCase())
+  let where = `drg_definition like '%${keyword}%'`
+  if (state) {
+    where += ` AND provider_state='${escapeSoql(state)}'`
+  }
+
   const params = new URLSearchParams({
     $limit: String(limit),
-    $where: `drg_definition like '%${drgKeyword.toUpperCase()}%'`,
+    $where: where,
     $order: 'total_discharges DESC',
   })
-
-  if (state) {
-    params.set(
-      '$where',
-      `drg_definition like '%${drgKeyword.toUpperCase()}%' AND provider_state='${state}'`,
-    )
-  }
 
   const res = await fetch(`${SOCRATA_BASE}?${params}`)
   if (!res.ok) throw new Error(`CMS Hospital Prices API error: ${res.status}`)

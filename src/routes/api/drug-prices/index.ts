@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { getDrugPrices } from '@/lib/goodrx'
 import { getCfEnv } from '@/lib/env'
 
-export const Route = createFileRoute('/api/drug-prices')({
+export const Route = createFileRoute('/api/drug-prices/')({
   server: {
     handlers: {
       GET: async ({ request }) => {
