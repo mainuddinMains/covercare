@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 import { usePreferencesStore } from '@/store/appStore'
 import { translations } from '@/lib/i18n'
+import LanguageToggle from '@/components/LanguageToggle'
 
 export const Route = createFileRoute('/')({ component: LandingPage })
 
@@ -102,6 +103,9 @@ function LandingPage() {
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-6 pb-16 pt-16 lg:pt-24">
+        <div className="mb-6 flex w-full max-w-3xl justify-end">
+          <LanguageToggle />
+        </div>
         <div className="mx-auto w-full max-w-3xl text-center">
           <div className="flex flex-col items-center gap-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-xl shadow-primary/25 sm:h-20 sm:w-20">

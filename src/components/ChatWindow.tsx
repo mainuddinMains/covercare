@@ -19,6 +19,7 @@ import { translations } from '@/lib/i18n'
 import { RotateCcw, Loader2, Compass, History } from 'lucide-react'
 import ToolResult from './chat/ToolResult'
 import ConversationList from './ConversationList'
+import LanguageToggle from './LanguageToggle'
 
 function AssistantAvatar() {
   return (
@@ -204,6 +205,7 @@ export default function ChatWindow() {
       <div className="mb-3 flex items-center justify-between">
         <h1 className="font-heading text-xl font-semibold">{t.nav_chat}</h1>
         <div className="flex items-center gap-1">
+          <LanguageToggle />
           {canShowHistory && (
             <Button variant="ghost" size="sm" onClick={() => setShowHistory(true)}>
               <History size={14} className="mr-1.5" />
