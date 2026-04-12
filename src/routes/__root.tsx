@@ -3,16 +3,17 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  redirect,
   useLocation,
-  useNavigate,
 } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import { useEffect } from 'react'
 import appCss from '../styles.css?url'
 import TabNav from '@/components/layout/TabNav'
 import DisclaimerBanner from '@/components/layout/DisclaimerBanner'
 import PreferencesProvider from '@/components/PreferencesProvider'
-import { useSession } from '@/lib/auth-client'
+import { getSession } from '@/lib/auth-server'
+
+const PUBLIC_PATHS = ['/', '/login']
 
 export const Route = createRootRoute({
   head: () => ({
@@ -30,6 +31,15 @@ export const Route = createRootRoute({
       { rel: 'stylesheet', href: appCss },
     ],
   }),
+  beforeLoad: async ({ location }) => {
+    const isPublicPage = PUBLIC_PATHS.includes(location.pathname)
+    if (isPublicPage) return
+
+    const session = await getSession()
+    if (!session) {
+      throw redirect({ to: '/' })
+    }
+  },
   component: RootLayout,
   shellComponent: RootDocument,
   errorComponent: RootError,
@@ -68,38 +78,16 @@ function RootError({ error, reset }: ErrorComponentProps) {
   )
 }
 
-const PUBLIC_PATHS = ['/', '/login']
-
 function RootLayout() {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { data: session, isPending } = useSession()
   const isPublicPage = PUBLIC_PATHS.includes(location.pathname)
 
-  useEffect(() => {
-    if (isPending) return
-    // Unauthenticated users on app pages go to the landing page
-    if (!session && !isPublicPage) {
-      navigate({ to: '/' })
-    }
-  }, [session, isPending, isPublicPage, navigate])
-
-  // Public pages (landing, login) get a clean layout
   if (isPublicPage) {
     return (
       <>
         <PreferencesProvider />
         <Outlet />
       </>
-    )
-  }
-
-  // While checking auth, show a spinner to avoid flash
-  if (isPending) {
-    return (
-      <div className="flex h-[100dvh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-primary" />
-      </div>
     )
   }
 

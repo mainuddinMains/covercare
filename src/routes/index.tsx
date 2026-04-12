@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   Compass,
   MessageCircle,
@@ -39,6 +39,7 @@ const FEATURES = [
 ]
 
 function LandingPage() {
+  const navigate = useNavigate()
   const locale = usePreferencesStore((s) => s.locale)
   const t = translations[locale]
 
@@ -126,7 +127,7 @@ function LandingPage() {
             className="text-sm text-muted-foreground"
             onClick={async () => {
               await authClient.signIn.anonymous()
-              window.location.href = '/chat'
+              navigate({ to: '/chat' })
             }}
           >
             {t.auth_guest_button}
