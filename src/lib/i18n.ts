@@ -26,7 +26,7 @@ export const translations = {
     suggestion_dental: 'What insurance plans cover dental?',
     suggestion_medicaid: 'Do I qualify for Medicaid?',
     suggestion_cardiologist: (state: string) =>
-      state ? `Find a cardiologist in ${state}` : 'Find a cardiologist near me',
+      `Find a cardiologist in ${state}`,
 
     hospitals_title: 'Find Hospitals Near You',
     hospitals_subtitle:
@@ -92,7 +92,7 @@ export const translations = {
       '\u00bfQu\u00e9 planes cubren tratamiento dental?',
     suggestion_medicaid: '\u00bfCalifico para Medicaid?',
     suggestion_cardiologist: (state: string) =>
-      state ? `Encontrar cardi\u00f3logo en ${state}` : 'Encontrar cardi\u00f3logo cerca de mi',
+      `Encontrar cardi\u00f3logo en ${state}`,
 
     hospitals_title: 'Encontrar Hospitales Cerca de Ti',
     hospitals_subtitle:
