@@ -282,5 +282,4 @@ export const TOOL_LABELS: Record<string, string> = {
   search_drug_info: 'Looking up drug info',
   get_insurance_profile: 'Reading your profile',
   detect_location: 'Detecting your location',
-  execute_typescript: 'Researching your options',
 }

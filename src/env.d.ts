@@ -14,5 +14,5 @@ interface CloudflareEnv {
   GOODRX_API_KEY?: string
   OPEN211_API_KEY?: string
   ZOCDOC_API_KEY?: string
-  CODE_EXECUTOR_URL?: string
+
 }
