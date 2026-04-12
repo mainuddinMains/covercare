@@ -47,9 +47,9 @@ export type InsuranceType =
 export const INSURANCE_LABELS: Record<InsuranceType, string> = {
   medicare: 'Medicare',
   medicaid: 'Medicaid',
-  'aca-bronze': 'ACA Marketplace \u2014 Bronze',
-  'aca-silver': 'ACA Marketplace \u2014 Silver',
-  'aca-gold': 'ACA Marketplace \u2014 Gold',
+  'aca-bronze': 'ACA Marketplace - Bronze',
+  'aca-silver': 'ACA Marketplace - Silver',
+  'aca-gold': 'ACA Marketplace - Gold',
   employer: 'Employer / Commercial Insurance',
   uninsured: 'Uninsured (Self-Pay)',
 }
@@ -65,17 +65,18 @@ const INSURANCE_CONFIG: Record<
 > = {
   medicare: { totalCostMultiplier: 1.0, coinsurance: 0.2, typicalDeductible: 240, note: '20% after Part B deductible ($240/yr in 2024)' },
   medicaid: { totalCostMultiplier: 0.7, coinsurance: 0.02, typicalDeductible: 0, note: 'Near-zero cost share; varies by state' },
-  'aca-bronze': { totalCostMultiplier: 2.5, coinsurance: 0.4, typicalDeductible: 7000, note: '40% coinsurance after ~$7,000 deductible' },
-  'aca-silver': { totalCostMultiplier: 2.5, coinsurance: 0.3, typicalDeductible: 4500, note: '30% coinsurance after ~$4,500 deductible' },
-  'aca-gold': { totalCostMultiplier: 2.5, coinsurance: 0.2, typicalDeductible: 1500, note: '20% coinsurance after ~$1,500 deductible' },
-  employer: { totalCostMultiplier: 2.2, coinsurance: 0.2, typicalDeductible: 1500, note: '20% coinsurance after ~$1,500 avg deductible' },
-  uninsured: { totalCostMultiplier: 3.5, coinsurance: 1.0, typicalDeductible: 0, note: 'Full charge; ask about self-pay discounts (40-60% off)' },
+  'aca-bronze': { totalCostMultiplier: 1.0, coinsurance: 0.4, typicalDeductible: 7000, note: '40% coinsurance after ~$7,000 deductible' },
+  'aca-silver': { totalCostMultiplier: 1.0, coinsurance: 0.3, typicalDeductible: 4500, note: '30% coinsurance after ~$4,500 deductible' },
+  'aca-gold': { totalCostMultiplier: 1.0, coinsurance: 0.2, typicalDeductible: 1500, note: '20% coinsurance after ~$1,500 deductible' },
+  employer: { totalCostMultiplier: 1.0, coinsurance: 0.2, typicalDeductible: 1500, note: '20% coinsurance after ~$1,500 avg deductible' },
+  uninsured: { totalCostMultiplier: 1.0, coinsurance: 1.0, typicalDeductible: 0, note: 'Full charge; ask about self-pay discounts (40-60% off)' },
 }
 
 export interface CostEstimate {
   procedure: string
   cpt: string
   medicareRate: number | null
+  avgSubmittedCharge: number | null
   totalEstimatedCost: number | null
   outOfPocketLow: number | null
   outOfPocketHigh: number | null
@@ -85,26 +86,33 @@ export interface CostEstimate {
   source: string
 }
 
-async function getMedicareRate(cpt: string): Promise<number | null> {
+interface MedicareRateResult {
+  allowedAmount: number
+  submittedCharge: number
+}
+
+async function getMedicareRate(cpt: string): Promise<MedicareRateResult | null> {
   try {
     const params = new URLSearchParams({
-      'filters[hcpcs_cd]': cpt,
-      'filters[place_of_srvc]': 'F',
+      'filter[HCPCS_Cd]': cpt,
+      'filter[Rndrng_Prvdr_Geo_Lvl]': 'National',
+      'filter[Place_Of_Srvc]': 'O',
       size: '1',
-      offset: '0',
     })
 
     const res = await fetch(
-      `https://data.cms.gov/provider-summary-by-type-of-service/medicare-physician-fee-schedule/medicare-physician-fee-schedule-pfs/api/1/datastore/query?${params}`,
+      `https://data.cms.gov/data-api/v1/dataset/6fea9d79-0129-4e4c-b1b8-23cd86a4f435/data?${params}`,
     )
 
     if (!res.ok) return null
 
-    const data: Record<string, unknown> = await res.json()
-    const rows = data?.data as Record<string, string>[] | undefined
+    const rows: Record<string, string>[] = await res.json()
     const row = rows?.[0]
-    const amount = parseFloat(row?.avg_mdcr_alowd_amt ?? '0')
-    return amount > 0 ? amount : null
+    if (!row) return null
+
+    const allowedAmount = parseFloat(row.Avg_Mdcr_Alowd_Amt ?? '0')
+    const submittedCharge = parseFloat(row.Avg_Sbmtd_Chrg ?? '0')
+    return allowedAmount > 0 ? { allowedAmount, submittedCharge } : null
   } catch {
     return null
   }
@@ -118,24 +126,33 @@ export async function estimateCost(
   if (!proc) throw new Error(`Unknown procedure: ${procedureKey}`)
 
   const config = INSURANCE_CONFIG[insurance]
-  const medicareRate = await getMedicareRate(proc.cpt)
+  const rate = await getMedicareRate(proc.cpt)
 
-  if (!medicareRate) {
+  if (!rate) {
     return {
       procedure: proc.name,
       cpt: proc.cpt,
       medicareRate: null,
+      avgSubmittedCharge: null,
       totalEstimatedCost: null,
       outOfPocketLow: null,
       outOfPocketHigh: null,
       insurance,
       insuranceLabel: INSURANCE_LABELS[insurance],
       note: 'CMS does not have rate data for this procedure. Contact your insurer for a cost estimate.',
-      source: 'CMS Medicare Physician Fee Schedule',
+      source: 'CMS Medicare Physician & Other Practitioners (2023)',
     }
   }
 
-  const totalCost = medicareRate * config.totalCostMultiplier
+  // Use the real submitted charge (what providers bill) as the basis for
+  // commercial and uninsured estimates instead of applying arbitrary multipliers
+  // to the Medicare allowed amount. For Medicare/Medicaid, use the allowed amount.
+  const totalCost =
+    insurance === 'medicare'
+      ? rate.allowedAmount
+      : insurance === 'medicaid'
+        ? rate.allowedAmount * config.totalCostMultiplier
+        : rate.submittedCharge * config.totalCostMultiplier
 
   const outOfPocketLow = Math.round(totalCost * config.coinsurance)
   const outOfPocketHigh = Math.min(
@@ -146,13 +163,14 @@ export async function estimateCost(
   return {
     procedure: proc.name,
     cpt: proc.cpt,
-    medicareRate: Math.round(medicareRate),
+    medicareRate: Math.round(rate.allowedAmount),
+    avgSubmittedCharge: Math.round(rate.submittedCharge),
     totalEstimatedCost: Math.round(totalCost),
     outOfPocketLow,
     outOfPocketHigh,
     insurance,
     insuranceLabel: INSURANCE_LABELS[insurance],
     note: config.note,
-    source: 'CMS Medicare Physician Fee Schedule',
+    source: 'CMS Medicare Physician & Other Practitioners (2023)',
   }
 }
