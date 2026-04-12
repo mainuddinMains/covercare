@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { anonymous } from 'better-auth/plugins'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { eq } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import * as schema from '@/lib/db/schema'
 
@@ -21,6 +22,25 @@ export function createAuth(env: CloudflareEnv) {
     plugins: [
       anonymous({
         emailDomainName: 'guest.carecompass.app',
+        onLinkAccount: async ({ anonymousUser, newUser }) => {
+          const oldId = anonymousUser.user.id
+          const newId = newUser.user.id
+
+          await db
+            .update(schema.insuranceProfile)
+            .set({ userId: newId })
+            .where(eq(schema.insuranceProfile.userId, oldId))
+
+          await db
+            .update(schema.reminder)
+            .set({ userId: newId })
+            .where(eq(schema.reminder.userId, oldId))
+
+          await db
+            .update(schema.conversation)
+            .set({ userId: newId })
+            .where(eq(schema.conversation.userId, oldId))
+        },
       }),
     ],
 

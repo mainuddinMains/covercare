@@ -66,6 +66,12 @@ export const translations = {
     auth_guest_button: 'Continue as Guest',
     auth_error_generic: 'Something went wrong. Please try again.',
     auth_logout: 'Log Out',
+
+    guest_profile_heading: 'You are browsing as a guest',
+    guest_profile_body:
+      'Create an account to save your insurance profile, reminders, and chat history.',
+    guest_create_account: 'Create an Account',
+    guest_exit: 'Exit Guest Mode',
   },
 
   es: {
@@ -135,6 +141,12 @@ export const translations = {
     auth_guest_button: 'Continuar como Invitado',
     auth_error_generic: 'Algo sali\u00f3 mal. Int\u00e9ntalo de nuevo.',
     auth_logout: 'Cerrar Sesi\u00f3n',
+
+    guest_profile_heading: 'Estas navegando como invitado',
+    guest_profile_body:
+      'Crea una cuenta para guardar tu perfil de seguro, recordatorios e historial de chat.',
+    guest_create_account: 'Crear una Cuenta',
+    guest_exit: 'Salir del Modo Invitado',
   },
 } as const
 
