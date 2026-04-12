@@ -7,7 +7,6 @@ import {
   BookOpen,
   ArrowRight,
   Phone,
-  Shield,
   Sparkles,
   Users,
   Loader2,
@@ -54,7 +53,6 @@ function LandingPage() {
   ]
 
   const TRUST_PILLS = [
-    { icon: Shield, label: t.landing_trust_hipaa },
     { icon: Users, label: t.landing_trust_free },
     { icon: Sparkles, label: t.landing_trust_ai },
   ]
