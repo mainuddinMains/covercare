@@ -4,6 +4,9 @@
 	"compatibility_date": "2025-09-02",
 	"compatibility_flags": ["nodejs_compat"],
 	"main": "@tanstack/react-start/server-entry",
+	"assets": {
+		"html_handling": "drop-trailing-slash"
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -11,5 +14,13 @@
 			"database_id": "943637ad-90c8-43a7-987e-c098ced49960",
 			"migrations_dir": "drizzle"
 		}
-	]
+	],
+	"env": {
+		"production": {
+			"name": "care-compass-prod",
+			"routes": [
+				{ "pattern": "compass.jacobmaynard.dev", "custom_domain": true }
+			]
+		}
+	}
 }

@@ -7,7 +7,7 @@
     "bri": "node dev.mjs --no-portless",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && wrangler deploy",
+    "deploy": "vite build && wrangler deploy --env production",
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
