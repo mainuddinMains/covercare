@@ -12,16 +12,18 @@ export function calcFplPercent(income: number, householdSize: number): number {
 function metalWeight(metalLevel: string, fplPercent: number): number {
   const level = metalLevel.toLowerCase()
   if (fplPercent < 150) {
-    // Very low income: Medicaid likely better, but if on marketplace prefer Silver (CSR)
+    // Very low income: Bronze and Catastrophic are affordable options;
+    // Silver gets CSR boost but Bronze should not be penalized heavily
     if (level === 'silver') return 1.0
-    if (level === 'bronze') return 0.7
+    if (level === 'bronze') return 0.95
+    if (level === 'catastrophic') return 0.90
     if (level === 'gold') return 0.5
     if (level === 'platinum') return 0.3
   } else if (fplPercent < 250) {
-    // Low-moderate: Silver has cost-sharing reductions
+    // Low-moderate: Silver has cost-sharing reductions, Bronze still affordable
     if (level === 'silver') return 1.0
+    if (level === 'bronze') return 0.85
     if (level === 'gold') return 0.8
-    if (level === 'bronze') return 0.5
     if (level === 'platinum') return 0.4
   } else if (fplPercent < 400) {
     // Moderate: Gold or Silver
