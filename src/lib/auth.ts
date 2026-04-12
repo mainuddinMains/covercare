@@ -60,13 +60,16 @@ export function createAuth(env: CloudflareEnv) {
     baseURL: env.AUTH_BASE_URL,
     trustedOrigins: (request) => {
       if (env.DEV_MODE === 'true') {
+        const origins: string[] = []
         const origin = request?.headers.get('origin')
         if (origin) {
           const url = new URL(origin)
           if (url.hostname === 'localhost' || url.hostname.endsWith('.localhost')) {
-            return [origin]
+            origins.push(origin)
           }
         }
+        if (env.AUTH_BASE_URL) origins.push(env.AUTH_BASE_URL)
+        return origins
       }
       return env.AUTH_TRUSTED_ORIGINS ? env.AUTH_TRUSTED_ORIGINS.split(',') : []
     },

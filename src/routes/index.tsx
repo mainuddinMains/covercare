@@ -64,7 +64,8 @@ function LandingPage() {
     setGuestError(null)
     const { error } = await authClient.signIn.anonymous()
     if (error) {
-      setGuestError(t.landing_guest_error)
+      console.error('[guest sign-in]', error)
+      setGuestError(error.message || t.landing_guest_error)
       setGuestLoading(false)
       return
     }
