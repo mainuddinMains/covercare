@@ -1,5 +1,6 @@
 import { Link, useMatchRoute } from '@tanstack/react-router'
 import {
+  LayoutDashboard,
   MessageCircle,
   Building2,
   Calculator,
@@ -15,6 +16,7 @@ export default function TabNav() {
   const t = translations[locale]
 
   const TABS = [
+    { to: '/dashboard' as const, label: t.nav_home, icon: LayoutDashboard },
     { to: '/chat' as const, label: t.nav_chat, icon: MessageCircle },
     { to: '/hospitals' as const, label: t.nav_hospitals, icon: Building2 },
     { to: '/estimate' as const, label: t.nav_cost, icon: Calculator },
@@ -43,7 +45,7 @@ export default function TabNav() {
               }`}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={19} strokeWidth={active ? 2.5 : 1.5} />
+              <Icon size={17} strokeWidth={active ? 2.5 : 1.5} />
               <span>{tab.label}</span>
             </Link>
           )
