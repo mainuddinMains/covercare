@@ -69,7 +69,7 @@ function LandingPage() {
       setGuestLoading(false)
       return
     }
-    navigate({ to: '/chat' })
+    navigate({ to: '/dashboard' })
   }
 
   return (

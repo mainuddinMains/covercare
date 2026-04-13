@@ -48,7 +48,7 @@ function LoginPage() {
       }
     }
 
-    navigate({ to: '/chat' })
+    navigate({ to: '/dashboard' })
   }
 
   return (
@@ -192,7 +192,7 @@ function LoginPage() {
                   setLoading(false)
                   return
                 }
-                navigate({ to: '/chat' })
+                navigate({ to: '/dashboard' })
               }}
               className="h-11 w-full rounded-xl text-sm font-medium"
             >
