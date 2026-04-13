@@ -6,6 +6,7 @@ import {
   Calculator,
   User,
   Award,
+  BookOpen,
 } from 'lucide-react'
 import { usePreferencesStore } from '@/store/appStore'
 import { translations } from '@/lib/i18n'
@@ -21,6 +22,7 @@ export default function TabNav() {
     { to: '/hospitals' as const, label: t.nav_hospitals, icon: Building2 },
     { to: '/estimate' as const, label: t.nav_cost, icon: Calculator },
     { to: '/plans' as const, label: t.nav_plans, icon: Award },
+    { to: '/learn' as const, label: t.nav_learn, icon: BookOpen },
     { to: '/profile' as const, label: t.nav_profile, icon: User },
   ]
 
@@ -45,7 +47,7 @@ export default function TabNav() {
               }`}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={17} strokeWidth={active ? 2.5 : 1.5} />
+              <Icon size={15} strokeWidth={active ? 2.5 : 1.5} />
               <span>{tab.label}</span>
             </Link>
           )
