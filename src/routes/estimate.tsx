@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import CostEstimator from '@/components/CostEstimator'
 import MrfRateLookup from '@/components/mrf/MrfRateLookup'
+import BillExplainer from '@/components/bills/BillExplainer'
 
 export const Route = createFileRoute('/estimate')({ component: EstimatePage })
 
-type Tab = 'estimate' | 'mrf'
+type Tab = 'estimate' | 'mrf' | 'bills'
 
 function EstimatePage() {
   const [tab, setTab] = useState<Tab>('estimate')
@@ -14,8 +15,11 @@ function EstimatePage() {
       <div className="flex rounded-lg border p-1 gap-1">
         <TabBtn active={tab === 'estimate'} onClick={() => setTab('estimate')}>Cost Estimate</TabBtn>
         <TabBtn active={tab === 'mrf'} onClick={() => setTab('mrf')}>Negotiated Rates</TabBtn>
+        <TabBtn active={tab === 'bills'} onClick={() => setTab('bills')}>Bill Explainer</TabBtn>
       </div>
-      {tab === 'estimate' ? <CostEstimator /> : <MrfRateLookup />}
+      {tab === 'estimate' && <CostEstimator />}
+      {tab === 'mrf' && <MrfRateLookup />}
+      {tab === 'bills' && <BillExplainer />}
     </div>
   )
 }
