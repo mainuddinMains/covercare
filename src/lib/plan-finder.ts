@@ -54,6 +54,70 @@ export const TOP_UNIVERSITIES = [
   'Iowa State University', 'University of Pittsburgh',
 ]
 
+// International student health insurance providers not available on the ACA marketplace.
+// These are sold directly and are typically cheaper for F-1 / J-1 visa holders.
+// Prices change frequently - always verify on the provider's official website.
+export const STUDENT_INSURANCE_PROVIDERS: {
+  name: string
+  tagline: string
+  features: string[]
+  j1Compliant: boolean
+  f1Eligible: boolean
+  searchQuery: string
+  note?: string
+}[] = [
+  {
+    name: 'ISO Student Insurance',
+    tagline: 'Most popular plan among international students',
+    features: ['Available year-round', 'No open enrollment window', 'J-1 compliant', 'Low monthly premiums', 'Prescription coverage'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'ISO Student Insurance isoa.org',
+    note: 'One of the most affordable options for international students. Network is narrower than ACA plans but covers routine care and emergencies well.',
+  },
+  {
+    name: 'CISI (Cultural Insurance Services International)',
+    tagline: 'Widely accepted for J-1 exchange visitors',
+    features: ['Meets J-1 State Dept. requirements', 'Covers pre-existing conditions (limited)', 'Emergency evacuation included', 'Available to F-1 and J-1'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'CISI Cultural Insurance Services International cisi.org',
+  },
+  {
+    name: 'StudentSecure (Tokio Marine HCC)',
+    tagline: 'Tiered plans from budget to comprehensive',
+    features: ['4 plan tiers (Budget to Elite)', 'Mental health coverage', 'PPO network access', 'Dental and vision add-ons'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'StudentSecure Tokio Marine HCC international student',
+  },
+  {
+    name: 'IMG Global (Student Health Advantage)',
+    tagline: 'Comprehensive coverage with large network',
+    features: ['Worldwide coverage', 'Telemedicine included', 'Sports coverage', 'Available to F-1 and J-1'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'IMG Global Student Health Advantage international student insurance',
+  },
+  {
+    name: 'GeoBlue (International Student Health)',
+    tagline: 'Blue Cross Blue Shield affiliated network',
+    features: ['BCBS network access (very wide)', 'No referrals needed', 'Global coverage', 'Strong mental health benefits'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'GeoBlue international student health insurance',
+    note: 'BCBS network gives access to most US doctors. Often more expensive than ISO but broader coverage.',
+  },
+  {
+    name: 'Seven Corners (Liaison Student)',
+    tagline: 'Flexible plans with optional add-ons',
+    features: ['Renewable monthly', 'Sports rider available', 'J-1 visa compliant tier', 'No deductible options'],
+    j1Compliant: true,
+    f1Eligible: true,
+    searchQuery: 'Seven Corners Liaison Student international health insurance',
+  },
+]
+
 export const STATE_PROGRAMS: Record<string, { name: string; coverage: string }> = {
   CA: { name: 'Medi-Cal', coverage: 'Full coverage for all income-eligible regardless of status' },
   NY: { name: 'NY State of Health Essential Plan', coverage: 'Low-cost coverage for those 0-200% FPL' },
