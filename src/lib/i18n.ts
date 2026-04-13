@@ -2,6 +2,7 @@ export type Locale = 'en' | 'es'
 
 export const translations = {
   en: {
+    nav_home: 'Home',
     nav_chat: 'Chat',
     nav_hospitals: 'Hospitals',
     nav_cost: 'Costs',
@@ -298,6 +299,7 @@ export const translations = {
   },
 
   es: {
+    nav_home: 'Inicio',
     nav_chat: 'Chat',
     nav_hospitals: 'Hospitales',
     nav_cost: 'Costos',
