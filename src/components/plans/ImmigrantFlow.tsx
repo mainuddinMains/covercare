@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import PlanCard from './PlanCard'
 import CompareModal from './CompareModal'
 import EnrollmentGuide from './EnrollmentGuide'
+import StudentInsuranceOptions from './StudentInsuranceOptions'
 import {
   HEALTH_CONDITIONS, DEMO_PLANS_MO, TOP_UNIVERSITIES, STATE_PROGRAMS,
   rerankPlans, inferBenefits, isSubsidyEligible,
@@ -167,9 +168,13 @@ export default function ImmigrantFlow({ onBack }: Props) {
         )}
 
         {(visa === 'f1' || visa === 'j1') && (
-          <InfoCard title="University SHIP Plan">
-            <p>Most universities require international students to carry the Student Health Insurance Plan (SHIP). Contact your university health center to enroll or apply for a waiver.</p>
-          </InfoCard>
+          <>
+            <StudentInsuranceOptions />
+            <InfoCard title="University SHIP Plan">
+              <p>Most universities require international students to carry the Student Health Insurance Plan (SHIP). Contact your university health center to enroll or apply for a waiver.</p>
+            </InfoCard>
+            <p className="text-xs font-semibold text-muted-foreground">ACA Marketplace Plans (also available to legal visa holders)</p>
+          </>
         )}
 
         <div className="flex items-center gap-2">
