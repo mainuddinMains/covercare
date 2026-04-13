@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
 
 // ── better-auth required tables ──
 
@@ -138,6 +138,24 @@ export const message = sqliteTable('message', {
   role: text('role').notNull(),
   parts: text('parts').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+// Cache for MRF negotiated rate lookups. Key is SHA-256 of fileUrl + billingCode.
+// Populated by the /api/mrf/rates endpoint after stream-scanning insurer files.
+export const mrfRateCache = sqliteTable('mrf_rate_cache', {
+  id: text('id').primaryKey(),
+  insurer: text('insurer').notNull(),
+  billingCode: text('billing_code').notNull(),
+  fileUrl: text('file_url').notNull(),
+  description: text('description').notNull().default(''),
+  rateMin: real('rate_min'),
+  rateMax: real('rate_max'),
+  rateMedian: real('rate_median'),
+  rateAvg: real('rate_avg'),
+  sampleSize: integer('sample_size'),
+  fetchedAt: integer('fetched_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
 })
