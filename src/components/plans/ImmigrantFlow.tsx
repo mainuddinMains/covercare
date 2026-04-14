@@ -7,6 +7,7 @@ import PlanCard from './PlanCard'
 import CompareModal from './CompareModal'
 import EnrollmentGuide from './EnrollmentGuide'
 import StudentInsuranceOptions from './StudentInsuranceOptions'
+import AlternativeCoverageCards from './AlternativeCoverageCards'
 import {
   HEALTH_CONDITIONS, DEMO_PLANS_MO, TOP_UNIVERSITIES, STATE_PROGRAMS,
   rerankPlans, inferBenefits, isSubsidyEligible,
@@ -70,6 +71,7 @@ export default function ImmigrantFlow({ onBack }: Props) {
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [showCompare, setShowCompare] = useState(false)
   const [sortBy, setSortBy] = useState<'score' | 'premium' | 'deductible'>('premium')
+  const [isMilitary, setIsMilitary] = useState(false)
 
   const filteredUniversities = TOP_UNIVERSITIES.filter(u =>
     universityQuery.length > 1 && u.toLowerCase().includes(universityQuery.toLowerCase()),
@@ -216,6 +218,15 @@ export default function ImmigrantFlow({ onBack }: Props) {
             />
           ))}
         </div>
+
+        <AlternativeCoverageCards
+          income={income}
+          householdSize={1}
+          isMilitary={isMilitary}
+          isStudent={visa === 'f1' || visa === 'j1'}
+          showShortTerm={visa !== 'f1' && visa !== 'j1'}
+          showEmployer={visa === 'h1b' || visa === 'h4' || visa === 'other' || visa === 'greencard'}
+        />
 
         <EnrollmentGuide isStudent={visa === 'f1' || visa === 'j1'} />
 
@@ -475,6 +486,19 @@ export default function ImmigrantFlow({ onBack }: Props) {
                 )
               })}
             </div>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-medium">Veteran or active military</p>
+              <p className="text-xs text-muted-foreground">May be eligible for VA or TRICARE</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsMilitary(m => !m)}
+              className={`relative h-6 w-11 rounded-full transition-colors ${isMilitary ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isMilitary ? 'left-[22px]' : 'left-0.5'}`} />
+            </button>
           </div>
           <Button
             className="w-full"
