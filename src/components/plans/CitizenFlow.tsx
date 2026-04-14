@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import PlanCard from './PlanCard'
 import CompareModal from './CompareModal'
 import EnrollmentGuide from './EnrollmentGuide'
+import AlternativeCoverageCards from './AlternativeCoverageCards'
 import {
   US_STATES, HEALTH_CONDITIONS, PRIORITIES,
   DEMO_PLANS_MO, rerankPlans, inferBenefits, isSubsidyEligible,
@@ -27,6 +28,8 @@ interface PersonalInfo {
   householdSize: number
   income: number
   tobaccoUser: boolean
+  isStudent: boolean
+  isMilitary: boolean
 }
 
 function ProgressBar({ step }: { step: Step }) {
@@ -50,6 +53,7 @@ export default function CitizenFlow({ onBack }: Props) {
   const [step, setStep] = useState<Step>(1)
   const [info, setInfo] = useState<PersonalInfo>({
     age: '', state: '', zip: '', householdSize: 1, income: 45000, tobaccoUser: false,
+    isStudent: false, isMilitary: false,
   })
   const [conditions, setConditions] = useState<string[]>([])
   const [priorities, setPriorities] = useState(PRIORITIES.map(p => p.id))
@@ -201,6 +205,13 @@ export default function CitizenFlow({ onBack }: Props) {
           ))}
         </div>
 
+        <AlternativeCoverageCards
+          income={info.income}
+          householdSize={info.householdSize}
+          isStudent={info.isStudent}
+          isMilitary={info.isMilitary}
+        />
+
         <EnrollmentGuide isStudent={false} />
 
         <p className="text-center text-[10px] text-muted-foreground">
@@ -321,6 +332,34 @@ export default function CitizenFlow({ onBack }: Props) {
               className={`relative h-6 w-11 rounded-full transition-colors ${info.tobaccoUser ? 'bg-primary' : 'bg-muted'}`}
             >
               <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${info.tobaccoUser ? 'left-[22px]' : 'left-0.5'}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-medium">Current student</p>
+              <p className="text-xs text-muted-foreground">Enrolled at a college or university</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setInfo(i => ({ ...i, isStudent: !i.isStudent }))}
+              className={`relative h-6 w-11 rounded-full transition-colors ${info.isStudent ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${info.isStudent ? 'left-[22px]' : 'left-0.5'}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-medium">Veteran or active military</p>
+              <p className="text-xs text-muted-foreground">May be eligible for VA or TRICARE</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setInfo(i => ({ ...i, isMilitary: !i.isMilitary }))}
+              className={`relative h-6 w-11 rounded-full transition-colors ${info.isMilitary ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${info.isMilitary ? 'left-[22px]' : 'left-0.5'}`} />
             </button>
           </div>
 
